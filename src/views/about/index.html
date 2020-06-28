@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .ccc {
+            color: #cccccc;
+        }
+
+        .black {
+            color: black;
+        }
+
+        .fly-nav {
+            padding: 20px;
+            padding-top: 30px;
+            box-sizing: border-box;
+        }
+
+        .status .text {
+            font-size: 16px;
+        }
+
+        .flexbox {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .flexbox div {
+            flex: 1;
+        }
+
+        .soft-function {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .soft-function i {
+            font-size: 24px;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        body,
+        html {
+            height: 100%;
+        }
+
+        #LAY_adminPopupAbout {
+            height: 100%;
+        }
+
+        .layui-layer-setwin .layui-layer-close2 {
+            left: -15px;
+            top: -18px;
+        }
+
+        .soft-function:hover {
+            background: #cccccc;
+        }
+
+        input.numbers {
+            background: #000;
+            outline: none;
+            color: #fff;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="height: 100%;">
+        <ul class="fly-nav layui-hide-xs" style="height: 100%;">
+            <div class="wy-softphone" style="height: 100%;">
+                <div class="softphone-stream" style="display:none;">
+                    <audio id="remoteAudio"></audio>
+                    <audio id="localAudio" muted="muted"></audio>
+                </div>
+
+                <div class="flexbox" style="margin-bottom: 20px;">
+                    <div class="soft-function ccc" id="softphone-status"
+                        style="pointer-events:none;cursor:not-allowed;">
+                        <div class="soft-function ready" data-toggle="soft-function" data-action="ready">
+                            <div class="icon"><i class="iconfont">&#xe62f;</i></div>
+                            <div class="text">连接</div>
+                        </div>
+                        <div class="soft-function notready" style="display:none;" data-toggle="soft-function"
+                            data-action="notready">
+                            <div class="icon"><i class="iconfont">&#xe62e;</i></div>
+                            <div class="text">断开连接</div>
+                        </div>
+                    </div>
+                    <div class="soft-function ccc" id="softphone-answer" data-toggle="soft-function"
+                        data-action="answer">
+                        <div class="icon"><i class="iconfont">&#xe602;</i></div>
+                        <div class="text">接听</div>
+                    </div>
+                    <div class="soft-function ccc" id="softphone-hungup" data-toggle="soft-function"
+                        data-action="hungup">
+                        <div class="icon"><i class="iconfont">&#xe58b;</i></div>
+                        <div class="text">挂断</div>
+                    </div>
+
+                    <!-- <div class="soft-function  diafunction" id="softphone-makecall">
+                        <div class="icon"><i class="iconfont">&#xe62d;</i></div>
+                        <div class="text">拨打</div>
+                    </div> -->
+                </div>
+                <div class="flexbox">
+                    <div class="soft-function ccc" id="softphone-status1">
+                        <div class="soft-function hold" data-toggle="soft-function" data-action="hold">
+                            <div class="icon"><i class="iconfont">&#xe777;</i></div>
+                            <div class="text">保持</div>
+                        </div>
+                        <div class="soft-function unhold " data-toggle="soft-function" data-action="unhold"
+                            style="display:none;">
+                            <div class="icon"><i class="iconfont">&#xe657;</i></div>
+                            <div class="text">取回</div>
+                        </div>
+                    </div>
+                    <div class="soft-function ccc" id="softphone-trans" data-toggle="soft-function" data-action="trans">
+                        <div class="icon"><i class="iconfont">&#xe604;</i></div>
+                        <div class="text">转接</div>
+                    </div>
+                    <div class="soft-function" id="wy_account">
+                        <div class="soft-function login" data-toggle="soft-function" data-action="login">
+                            <div class="icon"><i class="iconfont">&#xe61b;</i></div>
+                            <div class="text">登陆</div>
+                        </div>
+                        <div class="soft-function logout" style="display:none;" data-toggle="soft-function"
+                            data-action="logout">
+                            <div class="icon"><i class="iconfont">&#xe603;</i></div>
+                            <div class="text">登出</div>
+                        </div>
+                    </div>
+                    <!-- 弹屏 -->
+                    <div class="soft-function" id="dialog">
+                        <div class="soft-function noDialog" style="display:none;" data-toggle="soft-function"
+                            data-action="noDialog">
+                            <div class="icon"><i style="font-size: 20px;" class="iconfont icon-bofangqi-danmuguan"></i>
+                            </div>
+                            <div class="text">不弹屏</div>
+                        </div>
+                        <div class="soft-function Dialog" data-toggle="soft-function" data-action="Dialog">
+                            <div class="icon"><i style="font-size: 20px;" class="iconfont icon-bofangqi-danmukai"></i>
+                            </div>
+                            <div class="text">弹屏</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status ">
+                    <div class="text" id="caller">本机号码：<span class="number"></span></div>
+                    <div class="text" id="called" style="display: none;">被叫号码：<span class="number"></span></div>
+                </div>
+
+                <div class="nexus">
+                    <div class="speaker">
+                        <a>
+                            <span class="bo">拨号中·····</span>
+                            <span class="tong">通话中······</span>
+                        </a>
+                        <!-- <span class="numbers" style="font-size:12px; font-weight:normal; color:#989696;"></span> -->
+                    </div>
+                    <div class="screen">
+                        <div class="phone-tab-contents">
+                            <div class="tab phone current">
+                                <div class="number-area">
+                                    <span class="numbers"></span>
+                                    <span class="phone-pic"></span>
+                                    <span class="over-phone">结束通话</span>
+                                </div>
+                                <div class="numbers-container">
+                                    <span class="pushed1">1
+                                        <!-- <em class="brd">o o</em> --></span>
+                                    <span class="pushed2">2
+                                        <!-- <em>ABC</em> --></span>
+                                    <span class="pushed3">3
+                                        <!-- <em>DEF</em> --></span>
+                                    <span class="pushed4">4
+                                        <!-- <em>GHI</em> --></span>
+                                    <span class="pushed5">5
+                                        <!-- <em>JKL</em> --></span>
+                                    <span class="pushed6">6
+                                        <!-- <em>MNO</em> --></span>
+                                    <span class="pushed7">7
+                                        <!-- <em>PQRS</em> --></span>
+                                    <span class="pushed8">8
+                                        <!-- <em>TUV</em>< --></span>
+                                    <span class="pushed9">9
+                                        <!-- <em>WXYZ</em> --></span>
+                                    <span class="pushedasterisk fff">*</span>
+                                    <span class="pushed0">0
+                                        <!-- <em>+</em> --></span>
+                                    <span class="pushednumber fff">#</span>
+                                </div>
+                                <p class="cover"></p>
+
+                            </div>
+                        </div>
+                        <ul class="main-btns">
+                            <li><a class="btn-btn"></a></li>
+                            <li><a class="btn-del delete-btn"></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <script id="wy-login-html" type="text/html">
+                    <!-- <div class="wy-login-title">请输入登陆信息</div> -->
+                <div class="layui-form" style="margin-top:20px">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">分机号：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="TelNumber" id="extno" required lay-verify="required"
+                                placeholder="请输入分机号" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">密码：</label>
+                        <div class="layui-input-inline">
+                            <input type="password" name="password" id="extpass" required lay-verify="required"
+                                placeholder="请输入密码" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn login2">登录</button>
+                            <button class="layui-btn layui-btn-primary cancel">取消</button>
+                        </div>
+                    </div>
+                </div>
+                </script>
+
+            </div>
+
+        </ul>
+    </div>
+    <script>
+        $(document).on('keyup', function (event) {
+            $(".btn-btn").css('background-position', '0 -105px');
+            $('.cover').hide()
+            console.log(event.keyCode);
+            switch (event.keyCode) {
+                case 48: // 0
+                    $('.number-area .numbers').append(0);
+                    $(".bo").show();
+                    break;
+                case 49:
+                    $('.number-area .numbers').append(1);
+
+                    $(".bo").show();
+                    console.log(1)
+                    break;
+                case 50: // 0
+                    $('.number-area .numbers').append(2);
+
+                    $(".bo").show();
+                    console.log(2)
+                    break;
+                case 51:
+                    $('.number-area .numbers').append(3);
+
+                    $(".bo").show();
+                    break;
+                case 52: // 0
+                    $('.number-area .numbers').append(4);
+
+                    $(".bo").show();
+                    break;
+                case 53:
+                    $('.number-area .numbers').append(5);
+
+                    $(".bo").show();
+                    break;
+                case 54:
+                    $('.number-area .numbers').append(6);
+
+                    $(".bo").show();
+                    break;
+                case 55:
+                    $('.number-area .numbers').append(7);
+
+                    $(".bo").show();
+                    break;
+                case 56:
+                    $('.number-area .numbers').append(8);
+
+                    $(".bo").show();
+                    break;
+                case 57:
+                    $('.number-area .numbers').append(9);
+
+                    $(".bo").show();
+                    break;
+                case 8:
+                    $('.delete-btn').click()
+                    // $(".bo").show();
+                    break;
+                default:
+                    return false
+            }
+        });
+
+        $('#caller .number').text(sessionStorage.getItem('TelNumber'))
+        $(document).ready(function () {
+            $(".phone-pic").hide();
+            $(".over-phone").hide();
+            $(".bo").hide();
+            $(".tong").hide();
+            $(".cover").show();
+
+            /*	Current Tab 	*/
+            $('.phone-tabs li a').click(function () {
+                $('.phone-tabs li').removeClass('current');
+                $(this).parent().addClass('current');
+            });
+
+            /*	Simple Tab 	*/
+            var tabContents = $('.phone-tab-contents');
+            $('.phone-tabs .getphone').click(function () {
+                tabContents.removeClass('getpeoples');
+                tabContents.removeClass('getclock');
+            });
+
+            $('.phone-tabs .getclock').click(function () {
+                tabContents.removeClass('getpeoples');
+                tabContents.addClass('getclock');
+            });
+
+            $('.phone-tabs .getpeoples').click(function () {
+                tabContents.removeClass('getclock');
+                tabContents.addClass('getpeoples');
+            });
+
+            /*	Delete */
+            $('.delete-btn').click(function () {
+                var numbers = $('.number-area .numbers').text();
+                var numbers2 = $('.number-area .numbers').text().length;
+                $('.number-area .numbers').text(numbers.substr(0, numbers2 - 1));
+                if (numbers.substr(0, numbers2 - 1) == "") {
+                    $(".bo").hide();
+                    // $(".btn-btn").css('background-position', '0 0');
+                }
+            });
+
+            /*拨号键图片变化*/
+            $(".btn-btn").click(function (event) {
+                $(this).css('background-position', '0 -105px');
+            });
+
+            $(".btn-btn").click(function (event) {
+                if ($('.number-area .numbers').text()) {
+                    console.log($('.number-area .numbers').text())
+                    wySoftPhone.invite($('.number-area .numbers').text());
+                    $('.number-area .numbers').text("");
+                    $(".bo").hide();
+                    $(".tong").show();
+                    $(".numbers").hide();
+                    $(".phone-pic").show();
+                    $(".cover").show();
+                    $(this).css('background-position', '-1px -49px');
+                    $(".btn-del").css('background-position', '0 -49px');
+                } else {
+                    layer.msg("请重新输入");
+                }
+
+                $(this).click(function (event) {
+                    $(this).css('background-position', '0 0');
+                    $(".cover").hide();
+                    $(".tong").hide();
+                    $(".numbers").show();
+                    $(".numbers").text("");
+                    $(".phone-pic").hide();
+                    $(".btn-del").css('background-position', '0 0');
+                    $(this).show();
+                });
+
+            });
+
+
+            /*	Pusher	*/
+            var pusher = {
+                number: function (num) {
+                    $('.numbers-container .pushed' + num + '').click(function () {
+                        $('.number-area .numbers').append(num);
+                        // $('.speaker .numbers').append('' + num + '');
+                        $(".btn-btn").css('background-position', '0 -105px');
+                        $(".bo").show();
+                    });
+                }
+            }
+
+            pusher.number(1);
+            pusher.number(2);
+            pusher.number(3);
+            pusher.number(4);
+            pusher.number(5);
+            pusher.number(6);
+            pusher.number(7);
+            pusher.number(8);
+            pusher.number(9);
+            pusher.number(0);
+
+            $('.numbers-container .pushedasterisk').click(function () {
+                $('.number-area .numbers').append('*');
+            });
+
+            $('.numbers-container .pushednumber').click(function () {
+                $('.number-area .numbers').append('#');
+            });
+
+        })
+        var a = 0;
+        var timer = null;
+        $(document).on("click", "#dialog", function () {
+            a++
+            if (a % 2 == 1) {
+                $('#dialog .text').text('不弹屏')
+                $('#dialog i').removeClass('icon-bofangqi-danmukai').addClass('icon-bofangqi-danmuguan')
+                timer = setInterval(function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'http://voip.winsource.cn:9090/app/BombScreen.ashx?fun=BombScreen&user=' + sessionStorage.getItem("UserID"),
+                        dataType: 'json',
+                        success: function (res) {
+                            //console.log(res.code);
+                            if (res.code === "200") {
+                                sessionStorage.setItem("CustomerTelNumber", res.msg);
+                                sessionStorage.setItem("keys", res.keys);
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=call',
+                                    data: {
+                                        "data": res.msg
+                                    },
+                                    dataType: 'json',
+                                    success: function (ress) {
+                                        //layer.msg(ress);
+
+                                        if (ress.code === "200") {
+                                            sessionStorage.setItem("CRMUserInfo", ress.data);
+                                            //layer.msg(JSON.parse(data).msg);
+                                            tableClickCallList.reload({ // where: getcond(),
+                                                page: {
+                                                    curr: 1 //重新从第 1 页开始
+                                                }
+                                            });
+                                            //layer.msg(JSON.parse(ress).type);
+                                            if (ress.type === "0") {
+                                                p1 = layer.open({
+                                                    title: '编辑客户信息',
+                                                    closeBtn: 1,
+                                                    type: 2,
+                                                    shade: 0,
+                                                    maxmin: true,
+                                                    area: ['1000px', '700px'],
+                                                    content: ['../CRM/CrmUserInfoAdd.html'],
+                                                    success: function (layero, index) { }
+                                                });
+                                                //layer.full(p1);
+                                            };
+
+                                            if (ress.type === "1") {
+
+                                                //console.log(JSON.stringify(ress.data));
+                                                p2 = layer.open({
+                                                    title: '编辑客户信息',
+                                                    closeBtn: 1,
+                                                    type: 2,
+                                                    shade: 0,
+                                                    maxmin: true,
+                                                    area: ['1000px', '700px'],
+                                                    content: ['../CRM/CrmFollowAdd.html'],
+                                                    success: function (layero, index) { }
+                                                });
+                                                //layer.full(p2);
+                                            };
+
+                                        } else {
+
+                                            //layer.msg(JSON.parse(data).msg);
+
+                                            tableClickCallList.reload({ // where: getcond(),
+                                                page: {
+                                                    curr: 1 //重新从第 1 页开始
+                                                }
+                                            });
+                                        }
+                                    },
+                                    error: function (err) {
+                                        //layer.msg(err.status);
+                                        //alert(err.status);
+                                    }
+                                });
+
+                            }
+                        },
+                        error: function (err) {
+                            layer.msg("提交失败");
+                            alert(err.status);
+                        }
+                    })
+
+
+                }, 5000);
+            } else {
+                $('#dialog .text').text('弹屏')
+                $('#dialog i').removeClass('icon-bofangqi-danmuguan').addClass('icon-bofangqi-danmukai')
+                clearInterval(timer)
+            }
+        })
+
+        $(document).on('click', '.cancel', function () {
+            layer.close(wySoftPhone.dia)
+        })
+        $(document).on('click', '.login2', function () {
+            var extno = $("#extno").val();
+            var extpass = $("#extpass").val();
+            if (extno != '' && extpass != '') {
+                wySoftPhone.login(extno, extpass);
+                layer.close(wySoftPhone.dia)
+            } else {
+                layer.msg('请输入分机号和密码')
+                return false
+            }
+        })
+
+    </script>
+</body>
+
+</html>

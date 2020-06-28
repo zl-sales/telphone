@@ -1,0 +1,71 @@
+<title>通话记录</title>
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        CRM报表
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form">
+            <div class="layui-form-item">
+                <div class="layui-input-inline" style="float: right;">
+                    <select name="Keys" id="Keys" lay-filter="datetime1">
+                        <option value="day" selected>当日</option>
+                        <option value="week">近一周</option>
+                        <option value="month">近一月</option>
+                        <option value="quarter">近季度</option>
+                        <option value="year">近一年</option>
+                    </select>
+                </div>
+                <!-- <div class="layui-input-inline" style="float: right;">
+                        <input type="text" class="layui-input" id="range" placeholder="时间范围选取">
+                    </div> -->
+            </div>
+        </div>
+        <table id="CRMTable" lay-filter="CRMTable">
+        </table>
+    </div>
+</div>
+
+
+
+<script>
+    layui.use(["table", "form", "laydate"], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        layui.form.render()
+
+
+        form.on('select(datetime1)', function (data) {
+            // var date = $("#range").val().split(" - ")
+            CRMTable.reload({
+                where: {
+                    DepartmentID: sessionStorage.getItem('DepartmentID'),
+                    Keys: data.value,
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        });
+        var CRMTable = table.render({
+            elem: '#CRMTable'
+            , height: "full"
+            , url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=CrmReport' //数据接口
+            , where: {
+                DepartmentID: sessionStorage.getItem('DepartmentID'),
+                Keys: "day"
+            }
+            , page: true //开启分页
+            , cols: [[ //表头  呼叫次数  
+                { field: 'CompanyShortName', title: '单位简称' },
+                { field: 'UserAccount', title: '坐席号码' },
+                { field: 'SeatUserName', title: '坐席名称' },
+                { field: 'crm', title: '新增客户', sort: true },
+                { field: 'follow', title: '新增跟进', sort: true }
+            ]]
+        })
+
+    });
+</script>

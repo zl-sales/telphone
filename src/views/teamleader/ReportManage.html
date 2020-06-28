@@ -1,0 +1,141 @@
+<title>通话记录</title>
+
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        通话记录
+    </div>
+    <div class="layui-card-body">
+        <div class="fly-panel fly-panel-user" pad20>
+            <!--主体信息-->
+            <div class="layui-tab layui-tab-brief" lay-filter="SeatCallListTab">
+                <ul class="layui-tab-title">
+                    <li lay-id="1" class="layui-this">坐席报表</li>
+                    <li lay-id="2">CRM报表</li>
+                    <!--<li lay-id="3">当月报表</li>
+						<li lay-id="4">当季报表</li>
+						<li lay-id="5">当年报表</li>-->
+                </ul>
+                <div class="layui-form layui-tab-content" id="LAY_ucm" style="padding: 20px 0;">
+
+                    <!--坐席报表-->
+                    <div class="layui-tab-item layui-show">
+                        <div class="layui-block" style="margin-bottom: 10px; text-align: right;">
+                            <div class="layui-input-inline">
+                                <select name="Keys" lay-filter="datetime">
+                                    <option value="day" selected>当日</option>
+                                    <option value="week">近一周</option>
+                                    <option value="month">近一月</option>
+                                    <option value="quarter">近季度</option>
+                                    <option value="year">近一年</option>
+                                </select>
+                            </div>
+                        </div>
+                        <table class="layui-hide" id="SeatTable" lay-filter="SeatTable" style="margin-top: 30px;">
+                        </table>
+                    </div>
+                    <!--CRM报表-->
+                    <div class="layui-tab-item">
+                        <div class="layui-block" style="margin-bottom: 10px; text-align: right;">
+                            <div class="layui-input-inline">
+                                <select name="Keys" lay-filter="datetime1">
+                                    <option value="day" selected>当日</option>
+                                    <option value="week">近一周</option>
+                                    <option value="month">近一月</option>
+                                    <option value="quarter">近季度</option>
+                                    <option value="year">近一年</option>
+                                </select>
+                            </div>
+                        </div>
+                        <table class="layui-hide" id="CRMTable" lay-filter="CRMTable" style="margin-top: 30px;">
+                        </table>
+                    </div>
+                    <!--当月报表-->
+                    <!--<div class="layui-tab-item">
+
+						</div>-->
+                    <!--当季报表-->
+                    <!--<div class="layui-tab-item">
+
+						</div>-->
+                    <!--当年报表-->
+                    <!--<div class="layui-tab-item">
+
+						</div>-->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    layui.use(["table", "form"], function () {
+        var table = layui.table,
+            form = layui.form;
+
+        console.log(form.val());
+        form.on('select(datetime)', function (data) {
+            console.log(data.value); //得到被选中的值
+            SeatTable.reload({
+                where: {
+                    DepartmentID: sessionStorage.getItem('DepartmentID'),
+                    Keys: data.value
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        });
+        var SeatTable = table.render({
+            elem: '#SeatTable'
+            , height: "full"
+            , url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=SeatReport' //数据接口
+            , where: {
+                DepartmentID: sessionStorage.getItem('DepartmentID'),
+                Keys: "day"
+            }
+            , page: true //开启分页
+            , cols: [[ //表头  呼叫次数  
+                { field: 'caller_id_number', title: '坐席号码' },
+                { field: 'SeatUserName', title: '坐席名称' },
+                { field: 'CallNum', title: '拨打次数' },
+                { field: 'ConnectedNum', title: '接通次数' },
+                { field: 'ConnectionRate', title: '接通率' }
+            ]]
+        })
+
+        form.on('select(datetime1)', function (data) {
+            console.log(data.value); //得到被选中的值
+            CRMTable.reload({
+                where: {
+                    DepartmentID: sessionStorage.getItem('DepartmentID'),
+                    Keys: data.value
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        });
+        var CRMTable = table.render({
+            elem: '#CRMTable'
+            , height: "full"
+            , url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=CrmReport' //数据接口
+            , where: {
+                DepartmentID: sessionStorage.getItem('DepartmentID'),
+                Keys: "day"
+            }
+            , page: true //开启分页
+            , cols: [[ //表头  呼叫次数  
+                { field: 'CompanyShortName', title: '单位简称' },
+                { field: 'UserAccount', title: '坐席号码' },
+                { field: 'SeatUserName', title: '坐席名称' },
+                { field: 'crm', title: '新增客户' },
+                { field: 'follow', title: '新增跟进' }
+            ]]
+        })
+
+    });
+</script>

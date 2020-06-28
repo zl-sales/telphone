@@ -1,0 +1,37 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1240782",
+      "name": "今日",
+      "font_class": "jinri",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "1838918",
+      "name": "新增",
+      "font_class": "xinzeng",
+      "unicode": "e66e",
+      "unicode_decimal": 58990
+    },
+    {
+      "icon_id": "12339912",
+      "name": "跟进",
+      "font_class": "genjin",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "12402651",
+      "name": "接通电话",
+      "font_class": "jietongdianhua",
+      "unicode": "e6be",
+      "unicode_decimal": 59070
+    }
+  ]
+}

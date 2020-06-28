@@ -1,0 +1,296 @@
+<title>任务列表</title>
+
+
+<div style="height: 100%;box-sizing: border-box; overflow: hidden;">
+
+    <div class="layui-card" style="height: 100%;">
+        <div class="layui-card-header">
+            自动任务列表
+        </div>
+        <div class="layui-card-body" style="height: 100%;">
+            <table id="tasklist" lay-filter="tasklist" style="margin-top: 10px;"></table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var time = null
+
+    time = setInterval(() => {
+        Dialog()
+    }, 5000);
+
+    $(window).bind('beforeunload', function () {
+        clearInterval("time")
+    });
+
+    function Dialog() {
+        $.ajax({
+            type: 'POST',
+            url: 'http://voip.winsource.cn:9090/app/BombScreen.ashx?fun=BombScreen&user=' + sessionStorage.getItem("TelNumber"),
+            dataType: 'json',
+            success: function (res) {
+                if (res.code === "200") {
+                    sessionStorage.setItem("CustomerTelNumber", res.msg);
+                    sessionStorage.setItem("keys", res.keys);
+                    $.ajax({
+                        type: 'POST',
+                        url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=call',
+                        data: {
+                            "data": res.msg
+                        },
+                        dataType: 'json',
+                        success: function (ress) {
+                            //layer.msg(ress);
+                            if (ress.code === "200") {
+                                sessionStorage.setItem("CRMUserInfo", ress.data);
+                                //layer.msg(JSON.parse(ress).type);
+                                if (ress.type === "0") {
+                                    p1 = layer.open({
+                                        title: '添加客户信息',
+                                        closeBtn: 1,
+                                        type: 2,
+                                        maxmin: true,
+                                        area: ['1020px', '680px'],
+                                        content: ['/src/views/telphone/CrmUserInfoAdd.html'],
+                                        success: function (layero, index) { }
+                                    });
+                                    //layer.full(p1);
+                                };
+
+                                if (ress.type === "1") {
+                                    //console.log(JSON.stringify(ress.data));
+                                    p2 = layer.open({
+                                        title: '跟进客户信息',
+                                        closeBtn: 1,
+                                        type: 2,
+                                        maxmin: true,
+                                        area: ['1020px', '680px'],
+                                        content: ['/src/views/telphone/CrmFollowAdd.html'],
+                                        success: function (layero, index) { }
+                                    });
+                                    //layer.full(p2);
+                                };
+                            } else {
+                                //layer.msg(JSON.parse(data).msg);
+                                tasklist.reload({ // where: getcond(),
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                }
+            }
+        })
+    }
+
+
+    layui.use(['form', "table"], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var tasklist = table.render({
+            elem: '#tasklist',
+            loading: true,
+            url: "http://voip.winsource.cn:9090/app/AutoTask/AutoTask.ashx?fun=SeatAutoTaskList",
+            where: {
+                UserID: sessionStorage.getItem("TelNumber")
+            },
+            done: function (res, curr, count) {
+                var data = res.data
+                for (let i = 0; i < data.length; i++) {
+                    data[i].status = 0
+                }
+            },
+            page: true,
+            cols: [
+                [
+                    {
+                        field: "TaskID",
+                        title: "任务ID"
+                    },
+                    {
+                        field: "CallBetween",
+                        title: "呼叫间隔(秒)"
+                    },
+                    {
+                        field: "TaskExecutor",
+                        title: "委派坐席"
+                    },
+                    {
+                        field: "TotalNumberOfDaysCall",
+                        title: "日最大呼叫数"
+                    },
+                    {
+                        field: "CompleteNum",
+                        title: "已拨打数"
+                    },
+                    {
+                        field: "TasksNum",
+                        title: "任务总数"
+                    },
+                    {
+                        field: "status",
+                        title: "状态",
+                        templet: function (d) {
+                            return d.status == 0 ? `<i class="layui-icon layui-icon-pause" style="color: #FFB800;font-weight: 900;" title="暂停中"></i>` : `<i class="layui-icon layui-icon-play" style="color: #1E9FFF;font-weight: 900;" title="运行中"></i>`
+                        }
+                    },
+                    {
+                        field: "MissionStartTime",
+                        title: "任务开始时间"
+                    },
+                    {
+                        field: "TaskOverTime",
+                        title: "任务结束时间"
+                    },
+                    {
+                        field: "TaskStartDate",
+                        title: "任务开始日期"
+                    },
+                    {
+                        field: "TaskEndDate",
+                        title: "任务结束日期"
+                    },
+                    {
+                        title: "操作",
+                        width: 210,
+                        templet: function (d) {
+                            if (d.DTStatus == "false" || d.CompleteNum == d.TasksNum) {
+                                return `
+                            <div>
+                                <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="over">
+                                    <i class="layui-icon layui-icon-radio"></i>结束</a>
+                            </div>
+                            `
+                            } else {
+                                return `
+                            <div>
+                                <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="play">
+                                    <i class="layui-icon layui-icon-play"></i>开始</a>
+                                <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="pause">
+                                    <i class="layui-icon layui-icon-pause"></i>暂停</a>
+                                <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="over">
+                                    <i class="layui-icon layui-icon-radio"></i>结束</a>
+                            </div>
+                            `
+                            }
+                        }
+                    }
+                ]
+            ],
+        });
+        var timer = null;
+        table.on("tool(tasklist)", function (obj) {
+            Start = new Date(obj.data.MissionStartTime).valueOf()
+            End = new Date(obj.data.TaskOverTime).valueOf()
+            Now = new Date().valueOf()
+
+            if (obj.event == "over") {
+                layer.confirm('是否确定结束该任务？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    $.ajax({
+                        url: "http://voip.winsource.cn:9090/app/AutoTask/AutoTask.ashx?fun=AutoTaskDel",
+                        method: "get",
+                        data: {
+                            TaskID: obj.data.TaskID
+                        },
+                        success: function (res) {
+                            var res = JSON.parse(res)
+                            if (res.code == 200) {
+                                layer.closeAll()
+                                layer.msg("操作成功")
+                                tasklist.reload()
+                            } else {
+                                layer.closeAll()
+                                layer.msg("操作失败")
+                                tasklist.reload()
+                            }
+                        }
+                    })
+                }, function () {
+                    layer.closeAll()
+                });
+            } else if (obj.event == "play") {
+                if (obj.data.DTStatus == "true") {
+                    window.clearInterval(timer)
+                    $.ajax({
+                        url: "http://voip.winsource.cn:9090/app/AutoTask/AutoTask.ashx?fun=SeatAutoCall",
+                        method: "get",
+                        data: {
+                            TaskID: obj.data.TaskID
+                        },
+                        success: function (res) {
+                            var res = JSON.parse(res)
+                            if (res.code == 200) {
+                                layer.msg(res.msg)
+                                // tasklist.reload()
+                                obj.update({
+                                    status: 1,
+                                    CompleteNum: obj.data.CompleteNum + 1
+                                })
+                            } else if (res.code == 201) {
+                                layer.msg(res.msg)
+                                window.clearInterval(timer)
+                                tasklist.reload()
+                            } else {
+                                layer.msg(res.msg)
+                                obj.update({
+                                    status: 1
+                                })
+                            }
+                        }
+                    })
+                    timer = setInterval(() => {
+                        $.ajax({
+                            url: "http://voip.winsource.cn:9090/app/AutoTask/AutoTask.ashx?fun=SeatAutoCall",
+                            method: "get",
+                            data: {
+                                TaskID: obj.data.TaskID
+                            },
+                            success: function (res) {
+                                var res = JSON.parse(res)
+                                if (res.code == 200) {
+                                    layer.msg(res.msg)
+                                    // tasklist.reload()
+                                    obj.update({
+                                        status: 1,
+                                        CompleteNum: obj.data.CompleteNum + 1
+                                    })
+                                } else if (res.code == 201) {
+                                    layer.msg(res.msg)
+                                    window.clearInterval(timer)
+                                    tasklist.reload()
+                                } else {
+                                    layer.msg(res.msg)
+                                    obj.update({
+                                        status: 1
+                                    })
+                                }
+                            }
+                        })
+                    }, obj.data.CallBetween * 1000);
+                } else {
+                    layer.msg("不在时间范围内，无法点击")
+                }
+            } else if (obj.event == "pause") {
+                if (obj.data.DTStatus == "true") {
+                    layer.confirm('是否暂停该任务？', {
+                        btn: ['确定', '取消'] //按钮
+                    }, function () {
+                        tasklist.reload()
+                        window.clearInterval(timer)
+                        layer.closeAll()
+                    }, function () {
+                        layer.closeAll()
+                    });
+                } else {
+                    layer.msg("不在时间范围内，无法点击")
+                }
+            }
+        })
+    })
+</script>

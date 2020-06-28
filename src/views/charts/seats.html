@@ -1,0 +1,121 @@
+<title>通话记录</title>
+<style>
+    .layui-form-label{
+        width: 100px;
+        padding: 9px 0;
+    }
+</style>
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">
+            坐席报表
+        </div>
+        <div class="layui-card-body">
+            <div class="fly-panel fly-panel-user" pad20>
+                <!--主体信息-->
+                <div class="layui-tab layui-tab-brief" lay-filter="SeatCallListTab">
+                    <!-- <div class="layui-form" style="text-align: right;">
+                        <div class="layui-form-item layui-inline">
+                            <label class="layui-form-label">时间区间：</label>
+                            <div class="layui-input-block">
+                                <select name="Keys" lay-filter="datetime">
+                                    <option value="day" selected>当日</option>
+                                    <option value="week">近一周</option>
+                                    <option value="month">近一月</option>
+                                    <option value="quarter">近季度</option>
+                                    <option value="year">近一年</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="layui-form" style="text-align: right;">
+                        <div class="layui-form-item layui-inline">
+                            <label class="layui-form-label">时间范围选取：</label>
+                            <div class="layui-input-block">
+                                <input type="text" class="layui-input" autocomplete="off" id="range" placeholder="时间范围选取">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-content">
+                        <!--坐席报表-->
+                        <div class="layui-tab-item layui-show">
+                            <table class="layui-hide" id="SeatTable" lay-filter="SeatTable" style="margin-top: 30px;">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    layui.use(["table", "form","laydate"], function () {
+        var table = layui.table,
+            form = layui.form;
+
+
+        layui.laydate.render({
+            elem: '#range',
+            range: true,
+            done: function (value, date) {
+                if (value !== "") {
+                    var val = value.split(" - ")
+                    SeatTable.reload({
+                        where: {
+                            DepartmentID: sessionStorage.getItem('DepartmentID'),
+                            StartDate: val[0],
+                            EndDate: val[1]
+                        },
+                        page: {
+                            curr: 1
+                        }
+                    })
+                } else {
+                    SeatTable.reload({
+                        where: {
+                            DepartmentID: sessionStorage.getItem('DepartmentID'),
+                            StartDate: "",
+                            EndDate: ""
+                        },
+                        page: {
+                            curr: 1
+                        }
+                    })
+                }
+            }
+        });
+
+        // form.on('select(datetime)', function (data) {
+        //     console.log(data.value); //得到被选中的值
+        //     SeatTable.reload({
+        //         where: {
+        //             DepartmentID: sessionStorage.getItem('DepartmentID'),
+        //             Keys: data.value
+        //         },
+        //         page: {
+        //             curr: 1
+        //         }
+        //     })
+        // });
+        var SeatTable = table.render({
+            elem: '#SeatTable'
+            , height: "full"
+            , url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=SeatReport' //数据接口
+            , where: {
+                DepartmentID: sessionStorage.getItem('DepartmentID')
+            }
+            , page: true //开启分页
+            , cols: [[ //表头  呼叫次数  
+                { field: 'caller_id_number', title: '坐席号码' },
+                { field: 'SeatUserName', title: '坐席名称' },
+                { field: 'CallNum', title: '拨打次数', sort: true },
+                { field: 'ConnectedNum', title: '接通次数', sort: true },
+                { field: 'ConnectionRate', title: '接通率(%)', sort: true }
+            ]]
+        })
+
+    });
+</script>

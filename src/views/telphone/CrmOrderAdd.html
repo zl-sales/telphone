@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>CRM弹屏-预约记录</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../../start/layui/css/layui.css" media="all">
+		<!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+	</head>
+
+	<body>
+		<script src="../../../start/layui/layui.js" charset="utf-8"></script>
+		<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+		<div class="layui-card">
+            <div class="layui-card-body">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+                    <legend>预约记录</legend>
+                </fieldset>
+                <form class="layui-form" action="" onsubmit="return false">
+                    <div class="layui-form-item  layui-input-inline">
+                        <label class="layui-form-label">本机号码</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="TelNumber" name="TelNumber" required lay-verify="required" placeholder="本机号码" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-input-inline">
+                        <label class="layui-form-label">客户号码</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="CustomerTelNumber" name="CustomerTelNumber" required lay-verify="required" placeholder="请输入客户号码" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item  layui-input-inline">
+                        <label class="layui-form-label">客户称谓</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="CustomerName" name="CustomerName" required lay-verify="required" placeholder="请输入客户称谓" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item  layui-input-inline">
+                        <label class="layui-form-label">预约时间</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id = "OrderTime" name="OrderTime" required lay-verify="required" placeholder="请输入预约时间" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">客户备注</label>
+                        <div class="layui-input-block">
+                            <textarea name="CustomerRemarks" placeholder="请输入客户备注" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+		</div>
+	</body>
+	
+
+</html>
+<script>
+    layui.use(['layer', 'form', 'jquery','laydate'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;       
+        var laydate = layui.laydate;
+         
+        $("#TelNumber").val(sessionStorage.getItem("UserID"));
+        $("#CustomerTelNumber").val(sessionStorage.getItem("CustomerTelNumber"));
+        $("#CustomerName").val(sessionStorage.getItem("CustomerName"));
+		
+        laydate.render({ elem: '#OrderTime' ,type: 'datetime' });
+		
+        form.on('submit(formDemo)', function (data) {
+            //layer.msg(JSON.stringify(data.field));
+            $.ajax({
+                type: 'POST',
+                url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=CrmOrderAdd',
+                data: {
+                    "data": JSON.stringify(data.field)
+                },
+                success: function (data) {
+
+                    window.parent.location.reload();
+                    
+                },
+                error: function (err) {
+                    layer.msg("提交失败");
+                    alert(err.status);
+                }
+            })
+            return false;
+        });
+    });
+</script>

@@ -1,0 +1,134 @@
+<title>实时通话</title>
+
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        实时通话
+    </div>
+    <div class="layui-card-body">
+        <!--实时通话-->
+
+        <table id="ChannelsList" lay-filter="ChannelsList"></table>
+        <script type="text/html" id="ChannelListBar">
+                <a class="layui-btn layui-btn-xs" lay-event="insert">强插</a>
+                <a class="layui-btn layui-btn-xs" lay-event="listen">监听</a>
+                <a class="layui-btn layui-btn-xs" lay-event="kick">强踢</a>
+                <a class="layui-btn layui-btn-xs" lay-event="transfer">转移</a>
+            </script>
+    </div>
+</div>
+
+<script>
+
+    layui.use('table', function () {
+
+        var $ = layui.jquery,
+            table = layui.table
+
+        $(function () {
+            setInterval(function () {
+                $(".layui-icon-refresh").click();
+            }, 5000);
+        });
+
+        //实时通话记录
+        var a = table.render({
+            elem: '#ChannelsList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=ChannelsList',
+            where: {
+                DepartmentID: sessionStorage.getItem("DepartmentID")
+            },
+            page: {
+                layout: ['prev', 'page', 'next', 'skip', 'count', 'limit', 'refresh']
+            },
+            cols: [
+                [
+                    // {
+                    //     title: '操作',
+                    //     toolbar: '#ChannelListBar',
+                    //     width: 220
+                    // },
+                    {
+                        field: '主叫号码',
+                        title: '主叫号码'
+                    }, {
+                        field: '被叫号码',
+                        title: '被叫号码'
+                    }, {
+                        field: '呼叫状态',
+                        title: '呼叫状态'
+                    }, {
+                        field: '主叫时间',
+                        title: '呼叫时间'
+                    }, {
+                        field: '主叫ID',
+                        title: '主叫ID',
+                        hide: true
+                    }
+                ]
+            ]
+            // page: true
+        });
+        //实时通话处理
+        table.on('tool(ChannelsList)', function (obj) {
+            var data = obj.data;
+            console.log(obj)
+            if (obj.event === 'kick') {
+                json = JSON.stringify(data);
+                // layer.msg("强踢-" + json);
+                layer.open({
+                    title: '强踢',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['500px', '400px'],
+                    //content:'edit.html'
+                    content: ['/src/views/teamleader/dia/ChannelsKick.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+
+            } else if (obj.event === 'listen') {
+                json = JSON.stringify(data);
+                // layer.msg("监听-" + json);
+                layer.open({
+                    title: '监听',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['500px', '400px'],
+                    //content:'edit.html'
+                    content: ['/src/views/teamleader/dia/ChannelsListen.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+
+            } else if (obj.event === 'insert') {
+                json = JSON.stringify(data);
+                // layer.msg("强插-" + json);
+                layer.open({
+                    title: '强插',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['500px', '400px'],
+                    //content:'edit.html'
+                    content: ['/src/views/teamleader/dia/ChannelsInsert.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+            } else if (obj.event === 'transfer') {
+
+            }
+        });
+
+    });
+</script>

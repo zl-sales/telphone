@@ -1,0 +1,30 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1106434",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "8629242",
+      "name": "管理",
+      "font_class": "guanli",
+      "unicode": "e669",
+      "unicode_decimal": 58985
+    },
+    {
+      "icon_id": "8817462",
+      "name": "主页",
+      "font_class": "zhuye",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    }
+  ]
+}

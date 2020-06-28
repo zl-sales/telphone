@@ -1,0 +1,453 @@
+<title>通话记录</title>
+
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        通话记录
+    </div>
+    <div class="layui-card-body">
+        <div class="fly-panel fly-panel-user" pad20>
+            <!--主体信息-->
+            <div class="layui-tab layui-tab-brief" lay-filter="SeatCallListTab">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">分机列表</li>
+                    <li>实时通话</li>
+                    <li>当日通话</li>
+                    <li>历史通话</li>
+                </ul>
+                <div class="layui-form layui-tab-content" id="LAY_ucm">
+                    <!--分机列表-->
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-hide" id="TelRegList" lay-filter="TelRegList"></table>
+                    </div>
+                    <!--实时通话-->
+                    <div class="layui-tab-item">
+                        <table class="layui-hide" id="ChannelsList" lay-filter="ChannelsList"></table>
+                        <script type="text/html" id="ChannelListBar">
+								<a class="layui-btn layui-btn-xs" lay-event="insert">强插</a>
+								<a class="layui-btn layui-btn-xs" lay-event="listen">监听</a>
+								<a class="layui-btn layui-btn-xs" lay-event="kick">强踢</a>
+								<a class="layui-btn layui-btn-xs" lay-event="transfer">转移</a>
+							</script>
+                    </div>
+                    <!--当日通话-->
+                    <div class="layui-tab-item">
+                        <table class="layui-hide" id="TodayCallList" lay-filter="TodayCallList"></table>
+                        <script type="text/html" id="TodayCallListBar">
+								<a class="layui-btn layui-btn-xs" lay-event="TodayCallListPlay">播放录音</a>
+							</script>
+                        <audio controls id="TodayCallListPlayer"></audio>
+                    </div>
+                    <!--历史通话-->
+                    <div class="layui-tab-item">
+                        <div class="layui-form">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">主叫号码</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="caller_id_number" autocomplete="off" placeholder="请输入号码"
+                                        class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">被叫号码</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="destination_number" autocomplete="off" placeholder="请输入号码"
+                                        class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">起止日期</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="date" class="layui-input" id="test10" autocomplete="off"
+                                        placeholder="开始时间 - 结束时间">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="layui-hide" id="HistoryCallList" lay-filter="HistoryCallList"></table>
+                        <script type="text/html" id="HistoryCallListBar">
+								<a class="layui-btn layui-btn-xs" lay-event="HistoryCallListPlay">播放录音</a>
+							</script>
+                        <audio controls id="HistoryCallListPlayer"></audio>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    layui.define(['layer', 'laytpl', 'form', 'element', 'upload', 'table', 'util', "laydate"], function (exports) {
+
+        var $ = layui.jquery,
+            layer = layui.layer,
+            laytpl = layui.laytpl,
+            form = layui.form,
+            element = layui.element,
+            upload = layui.upload,
+            util = layui.util,
+            device = layui.device(),
+            table = layui.table,
+            DISABLED = 'layui-btn-disabled';
+
+
+        //手机折叠样式
+        var treeMobile = $('.site-tree-mobile'),
+            shadeMobile = $('.site-mobile-shade');
+
+        treeMobile.on('click', function () {
+            $('body').addClass('site-mobile');
+        });
+
+        shadeMobile.on('click', function () {
+            $('body').removeClass('site-mobile');
+        });
+
+        $(function () {
+            setInterval(function () {
+                $(".layui-icon-refresh").click();
+            }, 5000);
+        });
+
+        layui.laydate.render({
+            elem: '#test10'
+            , type: 'date'
+            , range: true
+        });
+        form.on('submit(demo1)', function (data) {
+            console.log(data.field);
+            history.reload({
+                where: {
+                    start_stamp: data.field.date.split(" - ")[0] || "",
+                    end_stamp: data.field.date.split(" - ")[1] || "",
+                    caller_id_number: data.field.caller_id_number,
+                    destination_number: data.field.destination_number
+                },
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            })
+            console.log(data.field.date.split(" - "));
+
+            return false;
+        });
+        //Hash地址的定位,保存刷新前tab位置
+        // var layid = location.hash.replace(/^#tab=/, '');
+        // element.tabChange('SeatCallListTab', layid);
+
+        element.on('tab(SeatCallListTab)', function (elem) {
+            // location.hash = 'tab=' + $(this).attr('lay-id');
+            // tab变换刷新tab页内的表格,刷新tab页内容.
+            var tabId = $(this).attr('lay-id') //.toString();
+            let obj = {
+                '0': () => {
+                    layer.msg("分机列表");
+                    table.reload('TelRegList', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                    }, 'data');
+                },
+                '1': () => {
+                    layer.msg("实时通话");
+                    table.reload('ChannelsList', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                    }, 'data');
+                },
+                '2': () => {
+                    layer.msg("当日通话");
+                },
+                '3': () => {
+                    layer.msg("历史通话");
+                },
+
+            }
+            // obj[tabId]();
+
+        });
+
+        //分机列表
+        table.render({
+            elem: '#TelRegList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TelRegList',
+            where: {
+                user: sessionStorage.getItem("TelNumber"),
+                // GroupName: sessionStorage.getItem("GroupName")
+            },
+            page: true,
+            cols: [
+                [
+
+                    {
+                        field: 'reg_user',
+                        title: '座机号码'
+                    }, {
+                        field: 'SeatUserName',
+                        title: '用户名称'
+                    }, {
+                        field: 'DepartmentName',
+                        title: '公司名称'
+                    }, {
+                        field: 'GroupName',
+                        title: '所属团队'
+                    },
+                    // {
+                    //     field: 'GroupLeaderType',
+                    //     title: '岗位职责'
+                    // }
+
+                ]
+            ],
+        });
+
+        //实时通话记录
+        table.render({
+            elem: '#ChannelsList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=ChannelsList',
+            where: {
+                user: sessionStorage.getItem("TelNumber"),
+                GroupName: sessionStorage.getItem("GroupName")
+            },
+            page: {
+                layout: ['prev', 'page', 'next', 'skip', 'count', 'limit', 'refresh']
+            },
+            cols: [
+                [
+                    {
+                        title: '操作',
+                        toolbar: '#ChannelListBar',
+                        width: 220
+                    },
+                    {
+                        field: '主叫号码',
+                        title: '主叫号码'
+                    }, {
+                        field: '被叫号码',
+                        title: '被叫号码'
+                    }, {
+                        field: '呼叫状态',
+                        title: '呼叫状态'
+                    }, {
+                        field: '主叫时间',
+                        title: '呼叫时间'
+                    }, {
+                        field: '主叫ID',
+                        title: '主叫ID',
+                        hide: true
+                    }
+                ]
+            ]
+            // page: true
+        });
+        //实时通话处理
+        table.on('tool(ChannelsList)', function (obj) {
+            var data = obj.data;
+            console.log(obj)
+            if (obj.event === 'kick') {
+                json = JSON.stringify(data);
+                layer.msg("强踢-" + json);
+                layer.open({
+                    title: '强踢',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['500px', '400px'],
+                    //content:'edit.html'
+                    content: ['./dia/ChannelsKick.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+
+            } else if (obj.event === 'listen') {
+                json = JSON.stringify(data);
+                layer.msg("监听-" + json);
+                layer.open({
+                    title: '监听',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['500px', '400px'],
+                    //content:'edit.html'
+                    content: ['./dia/ChannelsListen.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+
+            } else if (obj.event === 'insert') {
+                json = JSON.stringify(data);
+                layer.msg("强插-" + json);
+                layer.open({
+                    title: '强插',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['500px', '400px'],
+                    //content:'edit.html'
+                    content: ['./dia/ChannelsInsert.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+            } else if (obj.event === 'transfer') {
+
+            }
+        });
+
+        //当日通话记录播放录音
+        table.on('tool(TodayCallList)', function (obj) {
+            var data = obj.data;
+            console.log(obj)
+            if (obj.event == 'TodayCallListPlay') {
+                //layer.msg("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");
+                //var audio = new Audio("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");//这里的路径写上mp3文件在项目中的绝对路径
+                var audio = document.getElementById("TodayCallListPlayer");
+                $.ajax({
+                    methods: "get",
+                    url: "http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=RecordUrl",
+                    data: {
+                        CallNum: obj.data.destination_number,
+                        SeatTel: obj.data.caller_id_number,
+                        StartDate: obj.data.start_stamp
+                    },
+                    success: function (res) {
+                        var url = JSON.parse(res).url;
+                        audio.src = url;
+                        // func()
+                        // startplay(10)   播放时间设置
+                        audio.play();
+                    }
+                })
+
+            }
+        });
+
+        //历史通话记录播放录音
+        table.on('tool(HistoryCallList)', function (obj) {
+            var data = obj.data;
+
+            if (obj.event == 'HistoryCallListPlay') {
+                //layer.msg("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");
+                //var audio = new Audio("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");//这里的路径写上mp3文件在项目中的绝对路径
+                var audio = document.getElementById("HistoryCallListPlayer");
+                $.ajax({
+                    methods: "get",
+                    url: "http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=RecordUrl",
+                    data: {
+                        CallNum: obj.data.destination_number,
+                        SeatTel: obj.data.caller_id_number,
+                        StartDate: obj.data.start_stamp
+                    },
+                    success: function (res) {
+                        var url = JSON.parse(res).url;
+                        audio.src = url;
+                        // func()
+                        // startplay(10)   播放时间设置
+                        audio.play();
+                    }
+                })
+                //						layer.msg( "http://voip.winsource.cn:9090/recorde/" + obj.data.uuid + ".mp3");
+                //del(obj.data.id);
+            }
+        });
+
+        //当日通话记录
+        table.render({
+            elem: '#TodayCallList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TodayCallList&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+            cols: [
+                [{
+                    title: '操作',
+                    toolbar: '#TodayCallListBar',
+                    width: 100
+                }, {
+                    field: 'caller_id_number',
+                    title: '主叫号码'
+                }, {
+                    field: 'destination_number',
+                    title: '被叫号码',
+                    event: 'call',
+                    style: 'cursor: pointer'
+                }, {
+                    field: 'start_stamp',
+                    title: '开始时间'
+                }, {
+                    field: 'answer_stamp',
+                    title: '应答时间'
+                }, {
+                    field: 'end_stamp',
+                    title: '结束时间'
+                }, {
+                    field: 'billsec',
+                    title: '通话时长'
+                }, {
+                    field: 'hangup_cause',
+                    title: '通话状态',
+                    hide: true
+                }
+
+                ]
+            ],
+            page: true
+        });
+
+        //历史通话记录无查询
+        var history = table.render({
+            elem: '#HistoryCallList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=HistoryCallList&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+            cols: [
+                [{
+                    title: '操作',
+                    toolbar: '#HistoryCallListBar',
+                    width: 100
+                }, {
+                    field: 'caller_id_number',
+                    title: '主叫号码'
+                }, {
+                    field: 'destination_number',
+                    title: '被叫号码',
+                    event: 'call',
+                    style: 'cursor: pointer'
+                }, {
+                    field: 'start_stamp',
+                    title: '开始时间'
+                }, {
+                    field: 'answer_stamp',
+                    title: '应答时间'
+                }, {
+                    field: 'end_stamp',
+                    title: '结束时间'
+                }, {
+                    field: 'billsec',
+                    title: '通话时长'
+                }, {
+                    field: 'hangup_cause',
+                    title: '通话状态',
+                    hide: true
+                }
+
+                ]
+            ],
+            page: true
+        });
+
+    });
+</script>

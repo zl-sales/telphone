@@ -1,0 +1,210 @@
+<script type="text/html" template>
+  <link rel="stylesheet" href="{{ layui.setter.base }}style/res/css/login.css?v={{ layui.admin.v }}-1" media="all">
+</script>
+
+
+<div class="login-bj" style="width: 100%;height: 100%;background: url(/src/image/1.png) no-repeat;
+background-size: cover">
+  <div class="zyl_lofo_main">
+    <fieldset class="layui-elem-field layui-field-title zyl_mar_02">
+      <legend>欢迎登陆 - 文源云平台</legend>
+    </fieldset>
+    <div class="layui-form zyl_pad_01">
+      <div class="layui-col-sm12 layui-col-md12">
+        <div class="layui-form-item" pane="">
+          <label class="layui-form-label" style="color: #000;">权限类型</label>
+          <div class="layui-input-block JWT">
+            <input type="radio" name="admin" value="坐席" title="坐席" checked="">
+            <input type="radio" name="admin" value="组长" title="管理员">
+            <!-- <input type="radio" name="admin" value="管理员" title="管理员"> -->
+          </div>
+        </div>
+      </div>
+      <div class="layui-col-sm12 layui-col-md12">
+        <div class="layui-form-item">
+          <input type="text" name="userID" lay-verify="required|userName" autocomplete="off" placeholder="账号"
+            class="layui-input" style="padding-left: 30px;border-radius: 5px;background-color: rgba(54, 59, 88, .7);">
+          <i class="layui-icon layui-icon-username zyl_lofo_icon"></i>
+        </div>
+      </div>
+      <div class="layui-col-sm12 layui-col-md12">
+        <div class="layui-form-item">
+          <input type="password" name="password" lay-verify="required|pass" autocomplete="off" placeholder="密码"
+            class="layui-input" style="padding-left: 30px;border-radius: 5px;background-color: rgba(54, 59, 88, .7);">
+          <i class="layui-icon layui-icon-password zyl_lofo_icon"></i>
+        </div>
+      </div>
+      <div class="layui-col-sm12 layui-col-md12">
+        <div class="layui-row">
+          <div class="layui-col-xs6 layui-col-sm6 layui-col-md6">
+            <div class="layui-form-item">
+              <input type="text" name="vercode" id="vercode" lay-verify="required|vercodes" autocomplete="off"
+                placeholder="验证码" class="layui-input" maxlength="4"
+                style="padding-left: 30px;border-radius: 5px;background-color: rgba(54, 59, 88, .7);">
+              <i class="layui-icon layui-icon-vercode zyl_lofo_icon"></i>
+            </div>
+          </div>
+          <div class="layui-col-xs4 layui-col-sm4 layui-col-md4">
+            <div class="zyl_lofo_vercode zylVerCode"
+              style="cursor: pointer;color: lightblue;border-radius: 10px;border: 1px solid;margin-left: 20px;"
+              onclick="zylVerCode()"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layui-col-sm12 layui-col-md12" style="height: 50px;">
+          <button class="login-btn " lay-submit="" lay-filter="demo1"
+            style="width: 100%;color: #000;overflow: hidden;margin-top: 15px;">立即登录</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+  $(function () {
+    zylVerCode();//初始化生成随机数
+  });
+  //生成随机数
+  function zylVerCode(len) {
+    len = len || 4;
+    var $chars = 'abcdefhijkmnprstwxyz2345678';//默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1
+    var maxPos = $chars.length;
+    var zylCode = '';
+    for (i = 0; i < len; i++) {
+      zylCode += $chars.charAt(Math.floor(Math.random() * maxPos));
+    }
+    $(".zylVerCode").html(zylCode);
+  }
+
+
+  layui.use(['carousel', 'form', 'layer', 'jquery'], function () {
+    var carousel = layui.carousel,
+      form = layui.form;
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    form.render()
+    //自定义验证规则
+    form.verify({
+      userName: function (value) {
+        if (value.length < 5) {
+          return '账号至少得5个字符';
+        }
+      },
+      pass: [/^[\S]{4,12}$/, '密码必须4到12位，且不能出现空格'],
+      vercodes: function (value) {
+        //获取验证码
+        var zylVerCode = $(".zylVerCode").html();
+        if (value != zylVerCode) {
+          return '验证码错误';
+        }
+      },
+      content: function (value) {
+        layedit.sync(editIndex);
+      }
+    });
+
+    //监听提交
+    form.on('submit(demo1)', function (data) {
+      var url;
+      if (data.field.admin == "坐席" && data.field.userID !== "admin") {
+        url = "user"
+      } else if (data.field.admin == "组长" && data.field.userID !== "admin") {
+        if (data.field.userID.substring(0, 4) == "seat") {
+          url = "admin"
+        } else {
+          layer.alert('账号错误')
+          return false
+        }
+      } else if (data.field.userID == "admin") {
+        url = "superadmin"
+      }
+      window.sessionStorage.setItem('url', url)
+      $.ajax({
+        type: 'POST',
+        url: 'http://voip.winsource.cn:9090/app/login.ashx',
+        data: {
+          "fun": "CheckLogin",
+          "user": data.field.userID,
+          "password": data.field.password
+        },
+        success: function (res) {
+          if (JSON.parse(res).code == "200") {
+            var data = JSON.parse(JSON.parse(res).msg)[0]
+            var tel = data.ExtensionNumber
+            var GroupName = data.GroupName
+            var DepartmentID = data.DepartmentID
+            var username = data.SeatUserName
+            var SeatName = data.SeatName
+            var DepartmentName = data.DepartmentName
+            sessionStorage.setItem('username', username)
+            sessionStorage.setItem('SeatName', SeatName)
+            sessionStorage.setItem('DepartmentID', DepartmentID)
+            sessionStorage.setItem('DepartmentName', DepartmentName)
+            sessionStorage.setItem('TelNumber', tel)
+            sessionStorage.setItem('GroupName', GroupName)
+            localStorage.setItem('layuiAdmin', { "theme": { "color": { "main": "#20222A", "selected": "#009688", "alias": "default", "index": 0 } } })
+            //layer.msg(JSON.parse(res).msg.toString().replace("[","").replace("]",""));
+            var temp = JSON.parse(res).msg.toString().replace("[", "").replace("]", "");
+            sessionStorage.setItem("user", temp)
+            if (sessionStorage.getItem("url") == "user") {
+              location.hash = '/telphone/Call'
+            } else {
+              location.hash = "/index"
+            }
+          } else {
+            layer.msg(JSON.parse(res).msg)
+          }
+        },
+        error: function (err) {
+          layer.msg("网络错误错误");
+        }
+      })
+      return false;
+    });
+
+
+    //设置轮播主体高度
+    var zyl_login_height = $(window).height() / 1.4;
+    var zyl_car_height = $(".zyl_login_height").css("cssText", "height:" + zyl_login_height + "px!important");
+
+
+    //Login轮播主体
+    carousel.render({
+      elem: '#zyllogin' //指向容器选择器
+      ,
+      width: '100%' //设置容器宽度
+      ,
+      height: 'zyl_car_height',
+      arrow: 'always' //始终显示箭头
+      ,
+      anim: 'fade' //切换动画方式
+      ,
+      autoplay: true //是否自动切换false true
+      ,
+      arrow: 'hover' //切换箭头默认显示状态||不显示：none||悬停显示：hover||始终显示：always
+      ,
+      indicator: 'none' //指示器位置||外部：outside||内部：inside||不显示：none
+      ,
+      interval: '5000' //自动切换时间:单位：ms（毫秒）
+    });
+
+    //监听轮播--案例暂未使用
+    carousel.on('change(zyllogin)', function (obj) {
+      var loginCarousel = obj.index;
+    });
+    //粒子线条
+    $(".zyl_login_cont").jParticle({
+      background: "rgba(0,0,0,0)", //背景颜色
+      color: "#fff", //粒子和连线的颜色
+      particlesNumber: 100, //粒子数量
+      //disableLinks:true,//禁止粒子间连线
+      //disableMouse:true,//禁止粒子间连线(鼠标)
+      particle: {
+        minSize: 1, //最小粒子
+        maxSize: 5, //最大粒子
+        speed: 60, //粒子的动画速度
+      }
+    });
+  });
+</script>

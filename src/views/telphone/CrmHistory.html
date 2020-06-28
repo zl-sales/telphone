@@ -1,0 +1,251 @@
+<title>历史通话</title>
+
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-header">
+            历史通话
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-form layui-row" style="margin-bottom: 20px;display: flex;;flex-wrap: wrap;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">查询关键字</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="HistoryKey" id="HistoryKey" required lay-verify="required"
+                            placeholder="请输入关键字" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button type="button" class="layui-btn" name="HistoryDay" id="HistoryDay">本日通话</button>
+                    <button type="button" class="layui-btn" name="HistoryWeak" id="HistoryWeak">本周通话</button>
+                    <button type="button" class="layui-btn" name="HistoryMouth" id="HistoryMouth">本月通话</button>
+                    <button type="button" class="layui-btn" name="HistoryQuarter" id="HistoryQuarter">三月通话</button>
+                    <button type="button" class="layui-btn" name="History" id="History">半年通话</button>
+                </div>
+            </div>
+            <table id="SeatHistoryCallList" lay-filter="SeatHistoryCallList"></table>
+            <div class="layui-form-item" style="margin-top: 20px;">
+                <audio controls id="player"></audio>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="SeatHistoryCallListBar">
+    <a class="layui-btn layui-btn-xs" lay-event="HistoryCallListPlay">播放录音</a>
+</script>
+
+<script>
+    function intercept(str) {
+        var tel = str.toString()
+        var tel1 = tel.substr(0, 3) + "****" + tel.substr(7)
+        return tel1
+    }
+    layui.use(['table', 'form'], function () {
+        var form = layui.form,
+            table = layui.table
+        var audio = document.getElementById("player");
+        table.render({
+            elem: '#SeatHistoryCallList',
+            loading: true,
+            height: 480,
+            url: 'http://voip.winsource.cn:9090/app/CallHistory.ashx?fun=CrmCallList&user=' + sessionStorage.getItem("TelNumber"),
+            cols: [
+                [{
+                    title: '操作',
+                    toolbar: '#SeatHistoryCallListBar',
+                    width: 100
+                }, {
+                    field: 'call_uuid',
+                    title: 'call_uuid',
+                    hide: true
+                }, {
+                    field: 'TelNumber',
+                    title: '本机号码'
+                }, {
+                    field: 'CustomerTelNumber',
+                    title: '外呼号码',
+                    event: 'call',
+                    style: 'cursor: pointer;',
+                    templet: "<div title = '点击呼叫'>       <span title='呼叫{{intercept(d.CustomerTelNumber)}}';display:block;> <i class='iconfont'>&#xe602;</i></span>{{intercept(d.CustomerTelNumber)}} </div>",
+                    filter: true
+                }, {
+                    field: 'CallStatus', width: 100,
+                    title: '接通状态'
+                }, {
+                    field: 'CustomerName',
+                    title: '客户称谓'
+                }, {
+                    field: 'CustomerClassification', width: 100,
+                    title: '客户标识'
+                }, {
+                    field: 'answer_stamp',
+                    title: '接通时间'
+                }, {
+                    field: 'billsec',
+                    title: '通话时长'
+                }
+                    // ,
+                    // {
+                    //     title: '操作',
+                    //     width: 100,
+                    //     templet: `<div><a class="layui-btn layui-btn-xs" lay-event="addC">添加CRM</a></div>`
+                    // }
+                ]
+            ],
+            page: true
+        });
+
+        var $ = layui.jquery
+        //历史记录查询
+        $(document).on('click', '#HistoryDay', function () {
+            table.reload('SeatHistoryCallList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: $("#HistoryKey").val(),
+                    where: 'HistoryDay'
+                }
+            }, 'data');
+        });
+        $(document).on('click', '#HistoryWeak', function () {
+            table.reload('SeatHistoryCallList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: $("#HistoryKey").val(),
+                    where: 'HistoryWeak'
+                }
+            }, 'data');
+        });
+
+        $(document).on('click', '#HistoryMouth', function () {
+            table.reload('SeatHistoryCallList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: $("#HistoryKey").val(),
+                    where: 'HistoryMouth'
+                }
+            }, 'data');
+        });
+
+        $(document).on('click', '#HistoryQuarter', function () {
+            table.reload('SeatHistoryCallList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: $("#HistoryKey").val(),
+                    where: 'HistoryQuarter'
+                }
+            }, 'data');
+        });
+        $(document).on('click', '#History', function () {
+            table.reload('SeatHistoryCallList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: $("#HistoryKey").val(),
+                    where: 'History'
+                }
+            }, 'data');
+        });
+
+
+        //历史通话记录播放录音
+        table.on('tool(SeatHistoryCallList)', function (obj) {
+            var data = obj.data;
+            console.log(data);
+            if (obj.event == 'HistoryCallListPlay') {
+
+                $.ajax({
+                    methods: "get",
+                    url: "http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=RecordUrl",
+                    data: {
+                        CallNum: obj.data.CustomerTelNumber,
+                        SeatTel: obj.data.TelNumber,
+                        StartDate: obj.data.answer_stamp
+                    },
+                    success: function (res) {
+                        var url = JSON.parse(res).url;
+                        audio.src = url;
+                        audio.play();
+                    }
+                })
+            }
+            else if (obj.event === 'call') {
+                //layer.msg(obj.data.CustomerNumber);						
+                //删除已拨号任务
+                sessionStorage.setItem("CustomerTelNumber", obj.data.CustomerTelNumber);
+
+                // 	外呼号码
+                //wySoftPhone.invite(obj.data.destination_number);
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://voip.winsource.cn:9090/app/fs.ashx?fun=calls',
+                    data: {
+                        "caller": JSON.parse(sessionStorage.getItem("user")).ExtensionNumber,
+                        "called": obj.data.CustomerTelNumber
+                        //"called": "913207514235"
+                    },
+                    success: function (data) {
+
+                        layer.msg("提交拨号" + obj.data.CustomerTelNumber + "成功");
+                    },
+                    error: function (err) {
+                        layer.msg("提交失败");
+                        alert(err.status);
+                    }
+                })
+
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=call',
+                    data: {
+                        "data": sessionStorage.getItem('TelNumber')
+                    },
+                    dataType: 'json',
+                    success: function (ress) {
+                        //layer.msg(ress);
+
+                        if (ress.code === "200") {
+                            sessionStorage.setItem("CRMUserInfo", ress.data);
+
+                            if (ress.type === "0") {
+                                p1 = layer.open({
+                                    title: '编辑客户信息',
+                                    closeBtn: 1,
+                                    type: 2,
+                                    shade: 0,
+                                    maxmin: true,
+                                    area: ['1000px', '700px'],
+                                    content: ['/src/views/telphone/CrmUserInfoAdd.html']
+                                });
+
+                            };
+
+                            if (ress.type === "1") {
+                                p2 = layer.open({
+                                    title: '跟进客户信息',
+                                    closeBtn: 1,
+                                    type: 2,
+                                    shade: 0,
+                                    maxmin: true,
+                                    area: ['1000px', '700px'],
+                                    content: ['/src/views/telphone/CrmFollowAdd.html']
+                                });
+
+                            };
+
+                        }
+                    }
+                });
+
+            }
+        });
+    });
+</script>

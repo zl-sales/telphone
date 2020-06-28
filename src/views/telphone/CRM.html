@@ -1,0 +1,301 @@
+<title>CRM客户</title>
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        CRM客户
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form" style="margin-bottom: 20px;">
+            <!-- <a class="layui-btn" id="CrmCustomInfoAddBtn">
+                        <i class="layui-icon">&#xe608;</i> 添加
+                    </a> -->
+            <label class="layui-form-label">查询关键字</label>
+            <div class="layui-input-inline">
+                <input type="text" name="CrmHistoryKey" id="CrmHistoryKey" required lay-verify="required"
+                    placeholder="请输入关键字" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-input-inline" style="margin-left:10px">
+                <button type="button" class="layui-btn" name="CrmDay" id="CrmDay">当日未联系</button>
+                <button type="button" class="layui-btn" name="CrmWeak" id="CrmWeak">一周未联系</button>
+                <button type="button" class="layui-btn" name="CrmMouth" id="CrmMouth">一月未联系</button>
+                <button type="button" class="layui-btn" name="CrmQuarter" id="CrmQuarter">三月未联系</button>
+                <button type="button" class="layui-btn" name="CrmAll" id="CrmAll">所有记录</button>
+            </div>
+        </div>
+        <table class="layui-hide" id="CrmCustomInfoList" lay-filter="CrmCustomInfoList"></table>
+    </div>
+</div>
+<script type="text/html" id="CrmCustomInfoListBar">
+        <!--<a class="layui-btn layui-btn-xs" lay-event="OrderAdd">预约</a>-->
+<a class="layui-btn layui-btn-xs" lay-event="FollowUpAdd">跟进</a>
+</script>
+
+
+
+<script>
+    var timer = null
+
+    timer = setInterval(() => {
+        Dialog()
+    }, 5000);
+
+    $(window).bind('beforeunload', function () {
+        clearInterval("timer")
+    });
+
+
+    function Dialog() {
+        $.ajax({
+            type: 'POST',
+            url: 'http://voip.winsource.cn:9090/app/BombScreen.ashx?fun=BombScreen&user=' + sessionStorage.getItem("TelNumber"),
+            dataType: 'json',
+            success: function (res) {
+                if (res.code === "200") {
+                    sessionStorage.setItem("CustomerTelNumber", res.msg);
+                    sessionStorage.setItem("keys", res.keys);
+                    $.ajax({
+                        type: 'POST',
+                        url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=call',
+                        data: {
+                            "data": res.msg
+                        },
+                        dataType: 'json',
+                        success: function (ress) {
+                            //layer.msg(ress);
+                            if (ress.code === "200") {
+                                sessionStorage.setItem("CRMUserInfo", ress.data);
+                                //layer.msg(JSON.parse(data).msg);
+                                CrmCustomInfoList.reload({ // where: getcond(),
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                });
+                                //layer.msg(JSON.parse(ress).type);
+                                if (ress.type === "0") {
+                                    p1 = layer.open({
+                                        title: '添加客户信息',
+                                        closeBtn: 1,
+                                        type: 2,
+                                        shade: 0,
+                                        maxmin: true,
+                                        area: ['1020px', '680px'],
+                                        content: ['/src/views/telphone/CrmUserInfoAdd.html'],
+                                        success: function (layero, index) { }
+                                    });
+                                    //layer.full(p1);
+                                };
+
+                                if (ress.type === "1") {
+
+                                    //console.log(JSON.stringify(ress.data));
+                                    p2 = layer.open({
+                                        title: '跟进客户信息',
+                                        closeBtn: 1,
+                                        type: 2,
+                                        shade: 0,
+                                        maxmin: true,
+                                        area: ['1020px', '680px'],
+                                        content: ['/src/views/telphone/CrmFollowAdd.html'],
+                                        success: function (layero, index) { }
+                                    });
+                                    //layer.full(p2);
+                                };
+
+                            } else {
+
+                                //layer.msg(JSON.parse(data).msg);
+
+                                CrmCustomInfoList.reload({ // where: getcond(),
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                });
+                            }
+                        },
+                        error: function (err) {
+                            //layer.msg(err.status);
+                            //alert(err.status);
+                        }
+                    });
+
+                }
+            }
+        })
+    }
+    function intercept(str) {
+        var tel = str.toString()
+        var tel1 = tel.substr(0, 3) + "****" + tel.substr(7)
+        return tel1
+    }
+
+
+    layui.use(['table', 'form'], function () {
+        var form = layui.form,
+            table = layui.table
+
+        //CRM客户信息
+        CrmCustomInfoList = table.render({
+            elem: '#CrmCustomInfoList',
+            loading: true,
+            page: true,
+            height: 480,
+            url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=CrmCustomInfoList&user=' + sessionStorage.getItem("TelNumber"),
+            cols: [
+                [{
+                    title: '操作',
+                    toolbar: '#CrmCustomInfoListBar',
+                    width: 70
+                }, {
+                    field: 'CallStatus', width: 100,
+                    title: '来电状态'
+                }, {
+                    field: 'TelNumber', width: 100,
+                    title: '本机号码'
+                }, {
+                    field: 'CustomerTelNumber', width: 150,
+                    title: '客户号码',
+                    event: 'call',
+                    style: 'cursor: pointer;',
+                    templet: "<div title = '点击呼叫'> <span title='呼叫{{d.CustomerTelNumber}}';display:block;><i class='iconfont''>&#xe602;</i></span> {{ intercept(d.CustomerTelNumber)}}  </div>",
+                    filter: true,
+                    hide: true
+                },
+                {
+                    field: 'CustomerTelNumber', width: 150,
+                    title: '客户号码',
+                    event: 'call',
+                    style: 'cursor: pointer;',
+                    templet: "<div title = '点击呼叫'>                   <span title='呼叫{{intercept(d.CustomerTelNumber)}}';display:block;><i class='iconfont''>&#xe602;</i></span> {{ intercept(d.CustomerTelNumber)}}  </div>",
+                    filter: true
+                }, {
+                    field: 'CustomerAlternateTelNumber',
+                    title: '备用号码'
+                }, {
+                    field: 'CustomerName',
+                    title: '客户称谓'
+                }, {
+                    field: 'CustomerClassification', width: 100,
+                    title: '客户分类'
+                }, {
+                    field: 'SubmitTime', width: 200,
+                    title: '提交时间'
+                }]
+            ]
+        });
+        //Crm查询
+        var $ = layui.jquery
+        $(document).on('click', '#CrmDay', function () {
+            table.reload('CrmCustomInfoList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: 'CrmDay', where: $("#CrmHistoryKey").val()
+                }
+            }, 'data');
+        });
+        $(document).on('click', '#CrmWeak', function () {
+            table.reload('CrmCustomInfoList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: 'CrmWeak', where: $("#CrmHistoryKey").val()
+                }
+            }, 'data');
+        });
+        $(document).on('click', '#CrmMouth', function () {
+            table.reload('CrmCustomInfoList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: 'CrmMouth', where: $("#CrmHistoryKey").val()
+                }
+            }, 'data');
+        });
+        $(document).on('click', '#CrmQuarter', function () {
+            table.reload('CrmCustomInfoList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: 'CrmQuarter', where: $("#CrmHistoryKey").val()
+                }
+            }, 'data');
+        });
+        $(document).on('click', '#CrmAll', function () {
+            table.reload('CrmCustomInfoList', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    key: 'CrmAll', where: $("#CrmHistoryKey").val()
+                }
+            }, 'data');
+            $("#CrmHistoryKey").val("")
+        });
+        table.on('tool(CrmCustomInfoList)', function (obj) {
+            var data = obj.data;
+            sessionStorage.setItem("CustomerTelNumber", data.CustomerTelNumber)
+            //console.log(JSON.stringify(data));
+            if (obj.event == 'OrderAdd') {
+                p10 = layer.open({
+                    title: '预约信息',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['100%', '100%'],
+                    content: ['/src/views/telphone/CrmOrderAdd.html'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+                layer.full(p10);
+            } else if (obj.event == 'FollowUpAdd') {
+                sessionStorage.setItem("CRMUserInfo", JSON.stringify(data));
+                p11 = layer.open({
+                    title: '跟进记录',
+                    closeBtn: 1,
+                    type: 2,
+                    shade: 0,
+                    maxmin: true,
+                    area: ['100%', '100%'],
+                    content: ['/src/views/telphone/CrmFollowAdd.html'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+                    success: function (layero, index) {
+
+                    }
+                });
+                layer.full(p11);
+            } else if (obj.event === 'call') {
+                //layer.msg(obj.data.CustomerNumber);						
+                //删除已拨号任务
+                sessionStorage.setItem("CustomerTelNumber", obj.data.CustomerTelNumber);
+
+                //外呼号码
+                //wySoftPhone.invite(obj.data.destination_number);
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://voip.winsource.cn:9090/app/fs.ashx?fun=calls',
+                    data: {
+                        "caller": JSON.parse(sessionStorage.getItem("user")).ExtensionNumber,
+                        "called": obj.data.CustomerTelNumber
+                        //"called": "913207514235"
+                    },
+                    success: function (data) {
+                        layer.msg("提交拨号" + obj.data.CustomerTelNumber + "成功");
+                    },
+                    error: function (err) {
+                        layer.msg("提交失败");
+                        alert(err.status);
+                    }
+                })
+
+            }
+
+        });
+    });
+
+
+</script>

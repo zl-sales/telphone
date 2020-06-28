@@ -1,0 +1,158 @@
+.card-panel {
+  padding: 10px;
+  /* margin-bottom: 32px; */
+  border-radius: 8px;
+  height: 130px;
+  cursor: pointer;
+  font-size: 12px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  color: #666;
+  /* background: #fff; */
+  -webkit-box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
+  box-shadow: 5px 5px 4px 0 rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.05);
+  min-width: 150px;
+}
+.card-panel-col {
+  width: 19.5%;
+}
+.card-panel .iconfont {
+  color: #fae6d8;
+}
+.card-panel .layui-progress {
+  margin-top: 25px;
+}
+.box-icon {
+  display: flex;
+}
+.card-panel-icon-wrapper {
+  float: left;
+  -webkit-transition: all 0.38s ease-out;
+  transition: all 0.38s ease-out;
+  border-radius: 6px;
+  position: relative;
+  color: #fff;
+}
+.card-panel-icon-wrapper img {
+  width: 80px;
+  position: absolute;
+  height: 40px;
+  left: -2px;
+  bottom: -10px;
+}
+.card-panel-description {
+  float: right;
+  font-weight: 700;
+  margin-left: 0;
+  padding: 10px;
+}
+.card-panel-text {
+  line-height: 18px;
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-panel-num {
+  font-size: 20px;
+}
+.num {
+  color: #fff;
+}
+.card-panel-icon-wrapper span {
+  font-size: 56px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+div.num {
+  font-size: 18px;
+}
+.jinri {
+  background-image: linear-gradient(to right, #5e75df, #4cbdff);
+}
+.jietongdianhua {
+  background-image: linear-gradient(to right, #fd7a5e, #fed652);
+}
+.hungup1 {
+  background-image: linear-gradient(to right, #fe4cc8, #fe79c7);
+}
+.xinzeng {
+  background-image: linear-gradient(to right, #9761ff, #3d6b8b);
+}
+.genjin {
+  background-image: linear-gradient(to right, #36c1b4, #326b94);
+}
+/* .icon-jinri {
+  color: #619491;
+}
+.icon-jietongdianhua {
+  color: #ecb15f;
+}
+.icon-xinzeng {
+  color: #64bdff;
+}
+.icon-genjin {
+  color: #bbbf70;
+}
+.hungup {
+  color: #bf1818;
+} */
+/* .card-panel:hover .icon-jinri {
+  color: #fff;
+  background-color: #619491;
+  border-radius: 10px;
+}
+.card-panel:hover .icon-jietongdianhua {
+  color: #fff;
+  background-color: #ecb15f;
+  border-radius: 10px;
+}
+.card-panel:hover .icon-xinzeng {
+  color: #fff;
+  background-color: #64bdff;
+  border-radius: 10px;
+}
+.card-panel:hover .icon-genjin {
+  color: #fff;
+  background-color: #bbbf70;
+  border-radius: 10px;
+}
+.card-panel:hover .hungup {
+  color: #fff;
+  background-color: #bf1818;
+  border-radius: 10px;
+} */
+.layui-form-label.layui-required:after {
+  content: "*";
+  color: red;
+  position: absolute;
+  top: 5px;
+  left: 10px;
+}
+@media screen and (min-width: 700px) and (max-width: 1192px) {
+  .card-panel-icon-wrapper span {
+    font-size: 38px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .card-panel-text {
+    font-size: 14px;
+  }
+  .card-panel-icon-wrapper img {
+    width: 60px;
+    position: absolute;
+    height: 40px;
+    left: -2px;
+    bottom: 5px;
+  }
+  .card-panel .layui-progress {
+    margin-top: 10px;
+  }
+  .card-panel {
+    height: 110px;
+  }
+}

@@ -1,0 +1,190 @@
+<title>通话记录</title>
+
+
+<div class="layui-fluid">
+
+    <div class="layui-card">
+        <div class="layui-card-header">
+            用户管理
+        </div>
+        <div class="layui-card-body">
+            <table id="manage" lay-filter="manage"></table>
+        </div>
+    </div>
+    <div class="demo" style="display: none;">
+        <div class="layui-form demo" style="padding: 20px;">
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-required">原密码：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="oldpwd" lay-verify="required|oldpwd" autocomplete="off"
+                        placeholder="请输入原密码" class="layui-input oldpwd" lay-reqtext="此项为必填项">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-required">新密码：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="newpwd" lay-verify="required|pwd" lay-reqtext="此项为必填项" placeholder="请输入"
+                        autocomplete="off" class="layui-input newpwd">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-required">确认新密码：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="okpwd" lay-verify="required" lay-reqtext="此项为必填项" placeholder="请输入"
+                        autocomplete="off" class="layui-input okpwd">
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-top: 40px;">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+      <button class="layui-btn layui-btn-sm" lay-event="EditSeatName">修改坐席名称</button>
+      <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="EditTelPwd">修改电话密码</button>
+      <button class="layui-btn layui-btn-sm layui-btn-warm" lay-event="EditSeatPwd">修改登录密码</button>
+    </div>
+</script>
+
+<script>
+    function SetInfo(ExtensionNumber, name, telpwd, seatpwd) {
+        $.ajax({
+            method: "get",
+            url: 'http://voip.winsource.cn:9090/app/User/SeatUser.ashx?fun=update',
+            data: {
+                ExtensionNumber: ExtensionNumber,
+                SeatUserName: name,
+                ExtensionPassword: telpwd,
+                SeatPassword: seatpwd
+            },
+            success(res) {
+                var res = JSON.parse(res)
+                if (res.code == "200") {
+                    layui.table.reload('manage');
+                    layer.closeAll()
+                    layer.msg("修改成功")
+                } else {
+                    layer.msg('修改失败')
+                }
+            }
+        })
+    }
+
+
+    layui.use(["table", "form"], function () {
+        var table = layui.table
+        var form = layui.form
+
+
+        form.verify({
+            newpwd: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value) && value.length < 8) {
+                    return '密码不能有特殊字符且不低于8位';
+                }
+            }
+        });
+
+        table.render({
+            elem: '#manage',
+            page: true,
+            url: 'http://voip.winsource.cn:9090/app/User/SeatUser.ashx?fun=list&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+            cols: [[
+                { field: 'ExtensionNumber', title: '坐席号码' },
+                { field: 'SeatName', title: '坐席账号' },
+                { field: 'SeatUserName', title: '坐席名称' },
+                { field: 'SeatName', title: '坐席账号' },
+                { field: 'DepartmentName', title: '所属单位' },
+                { title: '操作', toolbar: '#toolbarDemo', width: 320 }
+            ]]
+        })
+        //监听事件
+        var TABLE = table.on('tool(manage)', function (obj) {
+            var data = obj.data
+            switch (obj.event) {
+                case 'EditSeatName':
+                    layer.prompt({ title: '修改坐席名称', formType: 0 }, function (pass, index) {
+                        if (pass !== "") {
+                            SetInfo(data.ExtensionNumber, pass, data.ExtensionPassword, data.SeatPassword)
+                        } else {
+                            layer.msg("用户名不能为空")
+                            return false
+                        }
+                    });
+                    break;
+                case 'EditTelPwd':
+                    layer.open({
+                        title: "修改电话密码",
+                        type: 1,
+                        content: $('.demo').html(),
+                        area: ['370px', '330px'],
+                        success: function (layero, index) {
+                            $(document).bind('input propertychange', ".oldpwd", function () {
+                                var old = $(".oldpwd").eq(1).val()
+                                form.verify({
+                                    oldpwd: function (value, item) { //value：表单的值、item：表单的DOM对象
+                                        if (value.trim() !== data.SeatPassword) {
+                                            return '原密码不正确';
+                                        }
+                                    }
+                                });
+                            });
+
+                            form.on('submit(*)', function (sub) {
+                                var newpwd = $(".newpwd").eq(1).val()
+                                var okpwd = sub.field.okpwd
+                                if (newpwd == okpwd) {
+                                    SetInfo(data.ExtensionNumber, data.SeatUserName, data.SeatPassword, okpwd)
+                                } else {
+                                    layer.msg("俩次密码不正确")
+                                    return false
+                                }
+                                return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+                            });
+                        }
+                    });
+                    break;
+                case 'EditSeatPwd':
+                    layer.open({
+                        title: "修改登录密码",
+                        type: 1,
+                        content: $('.demo').html(),
+                        area: ['370px', '330px'],
+                        success: function (layero, index) {
+                            $(document).bind('input propertychange', ".oldpwd", function () {
+                                var old = $(".oldpwd").eq(1).val()
+                                form.verify({
+                                    oldpwd: function (value, item) { //value：表单的值、item：表单的DOM对象
+                                        if (value.trim() !== data.ExtensionPassword) {
+                                            return '原密码不正确';
+                                        }
+                                    }
+                                });
+                            });
+
+
+                            form.on('submit(*)', function (sub) {
+                                var newpwd = $(".newpwd").eq(1).val()
+                                var okpwd = sub.field.okpwd
+                                if (okpwd === newpwd) {
+                                    SetInfo(data.ExtensionNumber, data.SeatUserName, okpwd, data.ExtensionPassword)
+                                } else {
+                                    layer.msg("俩次密码不正确")
+                                    return false
+                                }
+                                return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+                            });
+
+                        }
+                    });
+                    break;
+                default:
+                    break;
+            };
+        });
+    })
+</script>

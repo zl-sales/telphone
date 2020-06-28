@@ -1,0 +1,86 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "333006",
+      "name": "登录 用户",
+      "font_class": "icon",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "1374556",
+      "name": "转接",
+      "font_class": "zhuanjie",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "1881070",
+      "name": "接电话",
+      "font_class": "jiedianhua",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "2434457",
+      "name": "打电话",
+      "font_class": "dadianhua",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "3627038",
+      "name": "断开",
+      "font_class": "duankai",
+      "unicode": "e62e",
+      "unicode_decimal": 58926
+    },
+    {
+      "icon_id": "3627039",
+      "name": "连接",
+      "font_class": "lianjie",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "4320344",
+      "name": "开始",
+      "font_class": "kaishi",
+      "unicode": "e657",
+      "unicode_decimal": 58967
+    },
+    {
+      "icon_id": "6357535",
+      "name": "注销",
+      "font_class": "zhuxiao",
+      "unicode": "e6f3",
+      "unicode_decimal": 59123
+    },
+    {
+      "icon_id": "7575098",
+      "name": "挂断",
+      "font_class": "cancel-phone-copy",
+      "unicode": "e58b",
+      "unicode_decimal": 58763
+    },
+    {
+      "icon_id": "9677674",
+      "name": "保持类",
+      "font_class": "baochilei",
+      "unicode": "e777",
+      "unicode_decimal": 59255
+    },
+    {
+      "icon_id": "10359992",
+      "name": "退出",
+      "font_class": "tuichu",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    }
+  ]
+}

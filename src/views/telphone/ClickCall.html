@@ -1,0 +1,227 @@
+<title>点呼任务</title>
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        点呼任务
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-upload" style="margin-bottom: 20px;">
+            <button type="button" class="layui-btn layui-btn-normal" id="select">选择文件</button>
+            <button type="button" class="layui-btn" id="uploadBtn">开始上传</button>
+            <!--<button type="button" class="layui-btn" id="fpBtn">分配任务</button>-->
+            <a href="http://voip.winsource.cn:9090/recorde/模板.xls" download="模板.xls" style="float:right">点击下载模板</a>
+            <div class="layui-btn-group">
+                <button class="layui-btn layui-btn-danger delete-btn">批量删除</button>
+                <button class="layui-btn layui-btn-danger delete-all">全部删除</button>
+            </div>
+        </div>
+        <table class="layui-hide" id="ClickCallListTask" lay-filter="ClickCallListTask"></table>
+    </div>
+</div>
+<script type="text/html" id="CrmCustomInfoListBar">
+        <!--<a class="layui-btn layui-btn-xs" lay-event="OrderAdd">预约</a>-->
+<a class="layui-btn layui-btn-xs" lay-event="FollowUpAdd">跟进</a>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+
+
+<script>
+    function intercept(str) {
+        var tel = str.toString()
+        var tel1 = tel.substr(0, 3) + "****" + tel.substr(7)
+        return tel1
+    }
+
+    layui.use(['table', 'form', "upload", "element"], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var upload = layui.upload;
+        var element = layui.element;
+        upload.render({
+            elem: '#select',
+            url: 'http://voip.winsource.cn:9090/app/Upload.ashx',
+            accept: 'file', //普通文件
+            exts: 'xlsx|xls|csv', //只允许上传压缩文件
+            auto: false,
+            data: {
+                user: sessionStorage.getItem("user")
+            },
+            bindAction: '#uploadBtn',
+            before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                layer.msg('上传中', {
+                    icon: 16
+                    , shade: 0.3
+                }); //上传loading
+            },
+            done: function (res) {
+                if (res.code === "200") {
+                    layer.closeAll();
+                    layer.msg(res.msg);
+                    tableClickCallList.reload({
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                    });
+                } else {
+                    layer.msg(res.msg);
+                    layer.closeAll();
+                }
+            },
+            error: function () {
+                layer.msg("请求异常！");
+                layer.closeAll();
+            }
+        });
+
+
+        tableClickCallList = table.render({
+            elem: '#ClickCallListTask',
+            loading: true,
+            height: "full",
+            url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=ClickCallList&user=' + sessionStorage.getItem("user"),
+            cols: [
+                [
+                    { type: 'checkbox' },
+                    {
+                        field: 'ID',
+                        title: 'ID',
+                        hide: true
+                    }, {
+                        field: 'DepartmentID',
+                        title: 'DepartmentID',
+                        hide: true
+                    }, {
+                        field: 'CustomerName',
+                        title: '客户名称',
+                        hide: true
+                    }, {
+                        field: 'CustomerNumber',
+                        title: '客户号码',
+                        templet: function (d) {
+                            return intercept(d.CustomerNumber)
+                        }
+                    }
+                    ,
+                    {
+                        field: 'Address',
+                        title: '地址',
+                        hide: true
+                    },
+                    {
+                        field: 'AddTimes',
+                        title: '添加时间'
+                    },
+                    {
+                        field: 'AddPeople',
+                        title: '添加人'
+                    },
+                    {
+                        field: 'Note',
+                        title: '备注'
+                    },
+                    {
+                        title: '操作',
+                        templet: "#barDemo"
+                    }
+
+                ]
+            ],
+            page: true
+        });
+
+        // 删除单条数据
+        table.on("tool()", function (obj) {
+            var { data } = obj
+            if (obj.event == "del") {
+                var list = []
+                list.push(data.ID)
+                layer.confirm("是否确定删除？", function () {
+                    $.ajax({
+                        method: "post",
+                        url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=DelList',
+                        data: {
+                            UserID: sessionStorage.getItem("TelNumber"),
+                            CheckList: JSON.stringify($.makeArray(list))
+                        },
+                        dataType: "json",
+                        success: function (res) {
+                            if (res.code == 200) {
+                                layer.closeAll()
+                                tableClickCallList.reload()
+                                layer.msg("删除成功")
+                            } else {
+                                layer.closeAll()
+                                layer.msg("删除失败")
+                            }
+                        }
+                    })
+                })
+            }
+        })
+
+        var $ = layui.jquery
+        $(".delete-btn").click(function () {
+            var { data } = table.checkStatus('ClickCallListTask')
+            var CheckList = new Array()
+            console.log(data);
+            for (let i = 0; i < data.length; i++) {
+                CheckList.push(data[i].ID)
+            }
+
+            if (CheckList.length < 1) {
+                layer.msg("请选中后点击")
+                return false
+            }
+            layer.confirm("是否确定删除？", function () {
+                $.ajax({
+                    method: "post",
+                    url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=DelList',
+                    data: {
+                        UserID: sessionStorage.getItem("TelNumber"),
+                        CheckList: JSON.stringify($.makeArray(CheckList))
+                    },
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.code == 200) {
+                            layer.closeAll()
+                            tableClickCallList.reload()
+                            layer.msg("删除成功")
+                        } else {
+                            layer.closeAll()
+                            layer.msg("删除失败")
+                        }
+                    }
+                })
+            })
+        })
+    })
+
+    $(".delete-all").click(function () {
+
+        layer.confirm("是否确定删除？", function () {
+            $.ajax({
+                method: "post",
+                url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=DelAllList',
+                data: {
+                    UserID: sessionStorage.getItem("TelNumber")
+                },
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        layer.closeAll()
+                        tableClickCallList.reload()
+                        layer.msg("删除成功")
+                    } else {
+                        layer.closeAll()
+                        layer.msg("删除失败")
+                    }
+                }
+            })
+        })
+    })
+
+</script>

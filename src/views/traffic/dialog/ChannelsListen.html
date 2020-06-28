@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>添加组织结构</title>
+   <link rel="stylesheet" href="../../../../start/layui/css/layui.css">
+
+    <script src="../../../../start/layui/layui.js"></script>
+    <style>
+        #treeTbTree {
+            height: 535px;
+            overflow: auto;
+        }
+
+        @media screen and (max-width: 750px) {
+            #treeTbTree {
+                height: auto;
+            }
+        }
+        /** dtree选中颜色重写 */
+
+        .dtree-theme-item-this {
+            background-color: #eeeeee !important;
+        }
+    </style>
+    <style type="text/css">
+        .select-test {
+            position: absolute;
+            max-height: 300px;
+            height: 300px;
+            overflow: auto;
+            width: 100%;
+            z-index: 123;
+            display: none;
+            border: 1px solid silver;
+            top: 42px;
+        }
+
+        .layui-show {
+            display: block !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 0px;">
+                <legend>监听</legend>
+            </fieldset>
+            <form class="layui-form" action="" onsubmit="return false" lay-filter="edit">
+                <input type="hidden" class="主叫ID" name="主叫ID">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">主叫号码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="主叫号码" required lay-verify="required" placeholder="请输入所属部门内容" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">被叫号码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="被叫号码" required lay-verify="required" placeholder="请输入所属部门内容" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">呼叫状态</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="呼叫状态" required lay-verify="required" placeholder="请输入坐席用户内容" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">监听号码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="监听号码" required lay-verify="required" placeholder="请输入监听所用分机号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="formDemo">监 听</button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- js部分 -->
+    <script>
+        layui.use(['form', 'jquery'], function () {
+            var form = layui.form,
+                $ = layui.jquery;
+            $(function () {
+                var obj = eval("(" + parent.json + ")");
+                //layer.msg(parent.json);
+                //表单初始赋值
+                form.val('edit', {
+                    "主叫ID": obj.主叫ID, // "name": "value"	
+                    "主叫号码": obj.主叫号码,
+                    "被叫号码": obj.被叫号码,
+                    "呼叫状态": obj.呼叫状态                    
+                })
+            });
+
+
+            form.on('submit(formDemo)', function (data) {
+                //layer.msg(JSON.stringify(data.field)); 
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://192.168.58.99/monitor/fs.ashx?fun=listen',
+                    data: {
+                        "data": JSON.stringify(data.field)
+                    },
+                    success: function (data) {
+
+                        window.parent.location.reload();
+                        //layer.msg("提交成功");
+                    },
+                    error: function (err) {
+                        layer.msg("提交失败");
+                        alert(err.status);
+                    }
+                })
+                return false;
+            });
+        });
+    </script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+	<link rel="stylesheet" href="../../../../start/layui/css/layui.css">
+	<link rel="stylesheet" href="../../../lib//dtree/dtree.css">
+	<link rel="stylesheet" href="../../../lib/dtree/font/dtreefont.css">
+	<script src="../../../../start/layui/layui.js"></script>
+	<style>
+		#treeTbTree {
+			height: 535px;
+			overflow: auto;
+		}
+
+		@media screen and (max-width: 750px) {
+			#treeTbTree {
+				height: auto;
+			}
+		}
+
+		/** dtree选中颜色重写 */
+
+		.dtree-theme-item-this {
+			background-color: #eeeeee !important;
+		}
+	</style>
+	<style type="text/css">
+		.select-test {
+			position: absolute;
+			max-height: 300px;
+			height: 300px;
+			overflow: auto;
+			width: 100%;
+			z-index: 123;
+			display: none;
+			border: 1px solid silver;
+			top: 42px;
+		}
+
+		.layui-show {
+			display: block !important;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<fieldset class="layui-elem-field layui-field-title" style="margin-top: 0px;">
+				<legend>添加组织结构</legend>
+			</fieldset>
+			<form class="layui-form layui-form-pane" action="">
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">上级部门</label>
+					<div class="layui-input-block">
+						<div class="layui-unselect layui-form-select" id="city">
+							<div class="layui-select-title">
+								<!--<asp:TextBox name="textSuperiorDepartmentName" ID="textSuperiorDepartmentName" runat="server"  placeholder="请选择" readonly="" class="layui-input layui-unselect"></asp:TextBox>-->
+								<input type="text" name="SuperiorDepartmentName" id="textSuperiorDepartmentName"
+									placeholder="请选择" readonly="" class="layui-input layui-unselect">
+								<i class="layui-edge"></i>
+							</div>
+						</div>
+						<div class="layui-card select-test" id="test">
+							<div class="layui-card-body">
+								<div id="toolbarDiv">
+									<ul id="slTree" class="dtree" data-id="0" style="width: 100%;"></ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">上级部门ID</label>
+					<div class="layui-input-block">
+						<!--<asp:TextBox ID="textSuperiorDepartmentId" runat="server" name="textSuperiorDepartmentId" autocomplete="off" placeholder="请输入组织编码" class="layui-input></asp:TextBox>-->
+						<input type="text" id="textSuperiorDepartmentId" name="SuperiorDepartmentId" autocomplete="off"
+							placeholder="请输入组织编码" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">部门名称</label>
+					<div class="layui-input-block">
+						<input type="text" id="textDepartmentName" name="title" autocomplete="off" placeholder="请输入部门名称"
+							class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">部门层级</label>
+					<div class="layui-input-block">
+						<input type="text" id="textDepartmentLevel" name="title" autocomplete="off"
+							placeholder="请输入部门层级" class="layui-input">
+					</div>
+				</div>
+				<!--<div class="layui-form-item">
+					<label class="layui-form-label">分机号</label>
+					<div class="layui-input-block">
+						<input type="text" name="title" autocomplete="off" placeholder="请输入分机号" class="layui-input">
+					</div>
+				</div>-->
+				<div class="layui-form-item">
+					<button type="button" name="add" id="add" class="layui-btn" lay-filter="demo2">提交信息</button>
+				</div>
+
+			</form>
+		</div>
+	</div>
+	<!-- js部分 -->
+
+	<script>
+		layui.use(['dtree', 'layer', 'form', 'table', 'jquery'], function () {
+			var $ = layui.jquery;
+			var layer = layui.layer;
+			var form = layui.form;
+			var table = layui.table;
+			var dtree = layui.dtree;
+
+			var DTree = dtree.render({
+				elem: "#slTree",
+				url: "http://voip.winsource.cn:8666/org.ashx?fun=orgtree",
+				method: 'GET',
+				dataStyle: "layuiStyle", //使用layui风格的数据格式
+				dataFormat: "list", //配置data的风格为list
+				accordion: true,
+				response: {
+					message: "msg",
+					statusCode: 0
+				} //修改response中返回数据的定义
+
+			});
+			$("#textSuperiorDepartmentName").on("click", function () {
+				$(this).toggleClass("layui-form-selected");
+				$("#test").toggleClass("layui-show layui-anim layui-anim-upbit");
+			});
+			dtree.on("node(slTree)", function (obj) {
+				$("#textSuperiorDepartmentName").val(obj.param.context);
+				$("#textSuperiorDepartmentId").val(obj.param.nodeId);
+				$("#textSuperiorDepartmentName").toggleClass("layui-form-selected");
+				$("#test").toggleClass("layui-show layui-anim layui-anim-upbit");
+
+			});
+
+			$("button").on("click", function () {
+				var superiorDepartmentId = $("#textSuperiorDepartmentId").val();
+				var superiorDepartmentName = $("#textSuperiorDepartmentName").val();
+				var departmentName = $("#textDepartmentName").val();
+				var departmentLevel = $("#textDepartmentLevel").val();
+				$.ajax({
+					type: 'POST',
+					url: 'http://192.168.58.99/org.ashx?fun=addDepartment',
+
+					//contentType: "application/json; charset=utf-8",
+					//dataType: 'JSON',
+
+					data: {
+						"superiorDepartmentId": superiorDepartmentId,
+						"superiorDepartmentName": superiorDepartmentName,
+						"departmentName": departmentName,
+						"departmentLevel": departmentLevel
+					},
+					success: function (data) {
+						window.parent.location.reload();
+					},
+					error: function (err) {
+						layer.msg("err");
+						alert(err.status);
+					}
+				})
+
+			});
+		});
+	</script>
+
+</body>
+
+</html>

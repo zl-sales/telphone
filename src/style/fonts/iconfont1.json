@@ -1,0 +1,44 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "167179",
+      "name": "通话记录",
+      "font_class": "tonghuajilu",
+      "unicode": "e65b",
+      "unicode_decimal": 58971
+    },
+    {
+      "icon_id": "851735",
+      "name": "我的消息icon",
+      "font_class": "wodexiaoxiicon",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "6899011",
+      "name": "任务管理",
+      "font_class": "renwuguanli",
+      "unicode": "e688",
+      "unicode_decimal": 59016
+    },
+    {
+      "icon_id": "14509399",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e618",
+      "unicode_decimal": 58904
+    },
+    {
+      "icon_id": "14625662",
+      "name": "报表管理",
+      "font_class": "baobiaoguanli",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    }
+  ]
+}

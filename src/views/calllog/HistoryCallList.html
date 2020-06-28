@@ -1,0 +1,181 @@
+<title>历史通话</title>
+
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">
+            历史通话
+        </div>
+        <div class="layui-card-body">
+            <!--历史通话-->
+            <div class="layui-form">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">主叫号码</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="caller_id_number" autocomplete="off" placeholder="请输入号码"
+                            class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">被叫号码</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="destination_number" autocomplete="off" placeholder="请输入号码"
+                            class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">起止日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="date" class="layui-input" id="test10" autocomplete="off"
+                            placeholder="开始时间 - 结束时间">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">通话时长</label>
+                    <div class="layui-input-block">
+                        <select name="BillSec" lay-filter="BillSec">
+                            <option value="" selected="">全部</option>
+                            <option value="1">已接通</option>
+                            <option value="0">未接通</option>
+                            <option value="30">30秒以上</option>
+                            <option value="120">120秒以上</option>
+                            <option value="300">300秒以上</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <div class="layui-input-block">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">查询</button>
+                    </div>
+                </div>
+            </div>
+            <table id="HistoryCallList" lay-filter="HistoryCallList"></table>
+            <script type="text/html" id="HistoryCallListBar">
+                    <a class="layui-btn layui-btn-xs" lay-event="HistoryCallListPlay">播放录音</a>
+                </script>
+            <audio controls id="HistoryCallListPlayer" style="margin-top:10px;"></audio>
+        </div>
+    </div>
+
+<script>
+
+    layui.define(['form', 'table', 'laydate'], function (exports) {
+
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table
+        form.render()
+
+        layui.laydate.render({
+            elem: '#test10'
+            , type: 'date'
+            , range: true
+        });
+
+        form.on('submit(demo1)', function (data) {
+            console.log(data.field);
+            history.reload({
+                where: {
+                    start_stamp: data.field.date.split(" - ")[0] || "",
+                    end_stamp: data.field.date.split(" - ")[1] || "",
+                    caller_id_number: data.field.caller_id_number,
+                    destination_number: data.field.destination_number,
+                    BillSec: data.field.BillSec 
+                },
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            })
+            console.log(data.field.date.split(" - "));
+
+            return false;
+        });
+
+        //历史通话记录播放录音
+        table.on('tool(HistoryCallList)', function (obj) {
+            var data = obj.data;
+
+            if (obj.event == 'HistoryCallListPlay') {
+                //layer.msg("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");
+                //var audio = new Audio("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");//这里的路径写上mp3文件在项目中的绝对路径
+                var audio = document.getElementById("HistoryCallListPlayer");
+                var cur = 0;
+                var flag = 0;
+
+                var func = function () {
+                    if (cur > 0 && audio.currentTime >= cur) {
+                        cur = 0;
+                        audio.pause();
+                        audio.removeEventListener("timeupdate", func);
+                    }
+                };
+
+                function startplay(starttime) {
+                    if (flag == 0) {
+                        flag = 1;
+                        audio.autoplay = "autoplay";
+                        audio.load();
+                    }
+                    audio.currentTime = starttime;
+                    audio.addEventListener("timeupdate", func);
+                    audio.play();
+                }
+
+                $.ajax({
+                    methods: "get",
+                    url: "http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=RecordUrl",
+                    data: {
+                        CallNum: obj.data.destination_number,
+                        SeatTel: obj.data.caller_id_number,
+                        StartDate: obj.data.start_stamp
+                    },
+                    success: function (res) {
+                        var url = JSON.parse(res).url;
+                        audio.src = url;
+                        // func()
+                        // startplay(10)   播放时间设置
+                        audio.play();
+                    }
+                })
+            }
+        });
+
+
+        //历史通话记录无查询
+        var history = table.render({
+            elem: '#HistoryCallList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=HistoryCallList&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+            cols: [
+                [{
+                    title: '操作',
+                    toolbar: '#HistoryCallListBar',
+                    width: 100
+                }, {
+                    field: 'caller_id_number',
+                    title: '主叫号码'
+                }, {
+                    field: 'destination_number',
+                    title: '被叫号码',
+                    event: 'call',
+                    style: 'cursor: pointer'
+                }, {
+                    field: 'start_stamp',
+                    title: '开始时间'
+                }, {
+                    field: 'answer_stamp',
+                    title: '应答时间'
+                }, {
+                    field: 'end_stamp',
+                    title: '结束时间'
+                }, {
+                    field: 'billsec',
+                    title: '通话时长(秒)'
+                }
+                ]
+            ],
+            page: true
+        });
+
+    });
+</script>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../../../../start/layui/css/layui.css">
+    <script src="../../../../start/layui/layui.js"></script>
+</head>
+
+<style>
+    .layui-form-item {
+        width: 400px;
+        margin: 20px auto;
+    }
+
+    .layui-form-label {
+        width: 100px;
+        text-align: left;
+    }
+</style>
+
+<body>
+
+
+    <div class="layui-form Dform" lay-filter="Dform" style="padding:10px;box-sizing:border-box">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>编辑任务信息</legend>
+        </fieldset>
+        <div class="layui-form-item">
+            <label class="layui-form-label">任务名称：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="TaskName" lay-verify="required" placeholder="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">任务开始日期：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" lay-verify="required" name="TaskStartDate" autocomplete="off"
+                    id="TaskStartDate" placeholder="yyyy-MM-dd">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">任务结束日期：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" lay-verify="required" name="TaskEndDate" autocomplete="off"
+                    id="TaskEndDate" placeholder="yyyy-MM-dd">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">任务开始时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" lay-verify="required" autocomplete="off" name="MissionStartTime"
+                    id="MissionStartTime" placeholder="HH-mm-ss">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">任务结束时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" lay-verify="required" autocomplete="off" name="TaskOverTime"
+                    id="TaskOverTime" placeholder="HH-mm-ss">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">日呼叫总数：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="TotalNumberOfDaysCall" lay-verify="required" id="TotalNumberOfDaysCall"
+                    placeholder="" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux" style="font-size: 14px;color: black;">次/日
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">呼叫间隔：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="CallBetween" lay-verify="required" id="CallBetween" placeholder=""
+                    class="layui-input" value="30">
+            </div>
+            <div class="layui-form-mid layui-word-aux" style="font-size: 14px;color: black;">秒</div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit lay-filter="go">提交</button>
+                <button type="reset" class="layui-btn layui-btn-danger reset">重置</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        layui.use(['form', "laydate"], function () {
+            var Form = window.parent.data
+            var FTaskID = Form.TaskID
+            var form = layui.form
+            var $ = layui.jquery
+            form.val("Dform", {
+                ...Form
+            })
+            layui.laydate.render({
+                elem: "#TaskStartDate", trigger: 'click' //自动弹出控件的事件，采用click弹出
+            })
+            layui.laydate.render({
+                elem: "#TaskEndDate", trigger: 'click' //自动弹出控件的事件，采用click弹出
+            })
+            layui.laydate.render({
+                elem: "#MissionStartTime", trigger: 'click', //自动弹出控件的事件，采用click弹出
+                type: 'time'
+            })
+            layui.laydate.render({
+                elem: "#TaskOverTime", trigger: 'click', //自动弹出控件的事件，采用click弹出
+                type: 'time'
+            })
+            form.on('submit(go)', function (data) {
+                var S = $("#MissionStartTime").val().split(':')[0]
+                var E = $("#TaskOverTime").val().split(':')[0]
+                if (data.field.CallBetween < 30 && E <= S) {
+                    layer.msg("呼叫间隔不得小于三十秒，任务结束时间不得小于开始时间")
+                    return false
+                }
+                $.ajax({
+                    method: "post",
+                    url: "http://voip.winsource.cn:9090/app/AutoTask/AutoTask.ashx?fun=AutoTaskUpdate",
+                    data: { data: JSON.stringify({ ...form.val("Dform"), TaskID: FTaskID }) },
+                    success: function (res) {
+                        var Jres = JSON.parse(res)
+                        if (Jres.code == 200) {
+                            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index); //再执行关闭
+                            layer.msg(Jres.msg)
+                            parent.location.reload()
+
+                        } else {
+                            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index); //再执行关闭
+                            layer.msg(Jres.msg)
+                            parent.location.reload()
+                        }
+                    }
+                })
+                return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+            });
+            $(".reset").click(function () {
+                form.val("Dform", {
+                    ...Form
+                })
+            })
+        })
+    </script>
+</body>
+
+</html>

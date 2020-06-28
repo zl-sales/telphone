@@ -1,0 +1,243 @@
+<title>当日通话</title>
+
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">
+            当日通话
+        </div>
+        <div class="layui-card-body">
+            <!--当日通话-->
+            <div class="layui-form" style="text-align: right;">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">通话时长</label>
+                    <div class="layui-input-block">
+                        <select name="BillSec" lay-filter="BillSec" class="BillSec">
+                            <option value="" selected="">全部</option>
+                            <option value="1">已接通</option>
+                            <option value="0">未接通</option>
+                            <option value="30">30秒以上</option>
+                            <option value="120">120秒以上</option>
+                            <option value="300">300秒以上</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <table id="TodayCallList" lay-filter="TodayCallList"></table>
+            <script type="text/html" id="TodayCallListBar">
+                    <a class="layui-btn layui-btn-xs" lay-event="TodayCallListPlay">播放录音</a>
+                </script>
+            <audio controls id="TodayCallListPlayer" style="margin-top:10px;"></audio>
+        </div>
+    </div>
+
+<script>
+    var now = window.location.hash.split("=")[1]
+    layui.use(['form', 'table'], function (exports) {
+
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table
+        form.render()
+
+        form.on('select(BillSec)', function (data) {
+            console.log(data.value); //得到被选中的值
+            today.reload({
+                where: {
+                    BillSec: data.value
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        });
+
+        if (now == "on") {
+            console.log(now);
+            var today = table.render({
+                elem: '#TodayCallList',
+                loading: true,
+                url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TodayCallList&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+                where: {
+                    BillSec: 1
+                },
+                parseData: function (res) {
+                    $('.BillSec').val(1)
+                    form.render()
+                },
+                cols: [
+                    [{
+                        title: '操作',
+                        toolbar: '#TodayCallListBar',
+                        width: 100
+                    }, {
+                        field: 'caller_id_number',
+                        title: '主叫号码'
+                    }, {
+                        field: 'destination_number',
+                        title: '被叫号码',
+                        event: 'call',
+                        style: 'cursor: pointer'
+                    }, {
+                        field: 'start_stamp',
+                        title: '开始时间'
+                    }, {
+                        field: 'answer_stamp',
+                        title: '应答时间'
+                    }, {
+                        field: 'end_stamp',
+                        title: '结束时间'
+                    }, {
+                        field: 'billsec',
+                        title: '通话时长(秒)'
+                    }, {
+                        field: 'hangup_cause',
+                        title: '通话状态',
+                        hide: true
+                    }
+                    ]
+                ],
+                page: true
+            });
+        } else if (now == "not") {
+            var today = table.render({
+                elem: '#TodayCallList',
+                loading: true,
+                url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TodayCallList&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+                where: {
+                    BillSec: 0
+                },
+                parseData: function (res) {
+                    console.log($('.BillSec').val());
+                    $('.BillSec').val(0)
+                    form.render()
+                },
+                cols: [
+                    [{
+                        title: '操作',
+                        toolbar: '#TodayCallListBar',
+                        width: 100
+                    }, {
+                        field: 'caller_id_number',
+                        title: '主叫号码'
+                    }, {
+                        field: 'destination_number',
+                        title: '被叫号码',
+                        event: 'call',
+                        style: 'cursor: pointer'
+                    }, {
+                        field: 'start_stamp',
+                        title: '开始时间'
+                    }, {
+                        field: 'answer_stamp',
+                        title: '应答时间'
+                    }, {
+                        field: 'end_stamp',
+                        title: '结束时间'
+                    }, {
+                        field: 'billsec',
+                        title: '通话时长(秒)'
+                    }, {
+                        field: 'hangup_cause',
+                        title: '通话状态',
+                        hide: true
+                    }
+                    ]
+                ],
+                page: true
+            });
+        } else {
+            var today = table.render({
+                elem: '#TodayCallList',
+                loading: true,
+                url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TodayCallList&DepartmentID=' + sessionStorage.getItem("DepartmentID"),
+                cols: [
+                    [{
+                        title: '操作',
+                        toolbar: '#TodayCallListBar',
+                        width: 100
+                    }, {
+                        field: 'caller_id_number',
+                        title: '主叫号码'
+                    }, {
+                        field: 'destination_number',
+                        title: '被叫号码',
+                        event: 'call',
+                        style: 'cursor: pointer'
+                    }, {
+                        field: 'start_stamp',
+                        title: '开始时间'
+                    }, {
+                        field: 'answer_stamp',
+                        title: '应答时间'
+                    }, {
+                        field: 'end_stamp',
+                        title: '结束时间'
+                    }, {
+                        field: 'billsec',
+                        title: '通话时长(秒)'
+                    }, {
+                        field: 'hangup_cause',
+                        title: '通话状态',
+                        hide: true
+                    }
+                    ]
+                ],
+                page: true
+            });
+        }
+        //当日通话记录
+
+
+        //当日通话记录播放录音
+        table.on('tool(TodayCallList)', function (obj) {
+            var data = obj.data;
+            console.log(obj)
+            if (obj.event == 'TodayCallListPlay') {
+                //layer.msg("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");
+                //var audio = new Audio("http://192.168.58.207/recorde/" + obj.data.uuid + ".mp3");//这里的路径写上mp3文件在项目中的绝对路径
+                var audio = document.getElementById("TodayCallListPlayer");
+
+                var cur = 0;
+                var flag = 0;
+
+                var func = function () {
+                    if (cur > 0 && audio.currentTime >= cur) {
+                        cur = 0;
+                        audio.pause();
+                        audio.removeEventListener("timeupdate", func);
+                    }
+                };
+
+                function startplay(starttime) {
+                    if (flag == 0) {
+                        flag = 1;
+                        audio.autoplay = "autoplay";
+                        audio.load();
+                    }
+                    audio.currentTime = starttime;
+                    audio.addEventListener("timeupdate", func);
+                    audio.play();
+                }
+
+                $.ajax({
+                    methods: "get",
+                    url: "http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=RecordUrl",
+                    data: {
+                        CallNum: obj.data.destination_number,
+                        SeatTel: obj.data.caller_id_number,
+                        StartDate: obj.data.start_stamp
+                    },
+                    success: function (res) {
+                        var url = JSON.parse(res).url;
+                        audio.src = url;
+                        // func()
+                        // startplay(10)   播放时间设置
+                        audio.play();
+                    }
+                })
+            }
+        });
+
+    });
+</script>

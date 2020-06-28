@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>号码池管理</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link rel="stylesheet" href="../../../../start/layui/css/layui.css">
+	<script src="../../../../start/layui/layui.js"></script>
+</head>
+
+<body>
+
+
+	<div style="padding:10px;">
+		<div class="layui-form">
+			<!--<a class="layui-btn" id="add">
+					<i class="layui-icon">&#xe608;</i> 添加
+				</a>-->
+			<div class="layui-input-inline">
+				<input type="text" id="search_key" class="layui-input" placeholder="部门名称" />
+			</div>
+			<!--<div class="layui-input-inline">
+					发布时间：
+				</div>
+				<div class="layui-input-inline">
+					<input type="text" id="search_start" class="layui-input" placeholder="开始时间" autocomplete="off" />
+				</div>
+				<div class="layui-input-inline">
+					~
+				</div>
+				<div class="layui-input-inline">
+					<input type="text" id="search_end" class="layui-input" placeholder="结束时间" autocomplete="off" />
+				</div>
+				<div class="layui-input-inline">
+					<select id="search_cabh" lay-ignore style="height:38px;">
+						<option value="">--所有分类--</option>
+					</select>
+				</div>-->
+			<div class="layui-input-inline">
+				<button class="layui-btn layui-btn-normal" type="button" onclick="search()"><i
+						class="layui-icon">&#xe615;</i> 查询</button>
+			</div>
+
+		</div>
+		<table class="layui-hide" id="test2" lay-filter="test2"></table>
+
+		<script type="text/html" id="barDemo">
+				<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+				<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+			</script>
+	</div>
+
+	<script>
+		var tableIns;
+		var pop_index;
+		/*日期选择控件设置*/
+		layui.use('laydate', function () {
+			var laydate = layui.laydate;
+			laydate.render({
+				elem: '#search_start' //指定元素
+			});
+			laydate.render({
+				elem: '#search_end' //指定元素
+			});
+		});
+
+		var pagesize = 10; //页大小
+
+		layui.use('table', function () {
+			var table = layui.table;
+
+			tableIns = table.render({
+				elem: '#test2',
+				loading: true,
+				size: 'sm',
+				height: "full-150",
+				url: 'numPool.ashx?fun=list',
+				where: getcond(),
+				cols: [
+					[{
+						title: '操作',
+						toolbar: '#barDemo',
+						width: 150
+					}, {
+						field: 'DepartmentID',
+						hide: true,
+						title: '公司ID'
+					}, {
+						field: 'DepartmentName',
+						title: '公司名称'
+					}, {
+						field: 'Number',
+						title: '主叫号码'
+					}, {
+						field: 'NumberType',
+						title: '号码类型'
+					}, {
+						field: 'ConfigurationStatus',
+						title: '配置状态'
+					}, {
+						field: 'Datetimes',
+						title: '设置时间'
+					}
+
+					]
+				],
+				page: true,
+				limit: pagesize
+			});
+
+			//监听行工具事件
+			table.on('tool(test2)', function (obj) {
+				var data = obj.data;
+				console.log(obj)
+				if (obj.event === 'del') {
+					del(obj.data.ID);
+				} else if (obj.event === 'edit') {
+					json = JSON.stringify(data);
+					//layer.msg(json);
+					layer.open({
+						title: '添加号码池',
+						closeBtn: 1,
+						type: 2,
+						shade: 0,
+						maxmin: true,
+						area: ['500px', '320px'],
+						//content:'edit.html'
+						content: ['numPoolEdit.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+						success: function (layero, index) {
+
+						}
+					});
+
+				}
+
+			});
+		});
+
+		/*拼接条件返回postdata*/
+		function getcond() {
+
+			var key = document.getElementById("search_key").value;
+			//				var start = document.getElementById('search_start').value;
+			//				var end = document.getElementById('search_end').value;
+			//var cabh = document.getElementById('search_cabh').value;
+			var postdata = {
+				key: key,
+				//start: start,
+				//end: end,
+				//cabh: cabh
+			};
+			return postdata;
+		}
+
+		/*查询*/
+		function search() {
+
+			tableIns.reload({
+				where: getcond(),
+				page: {
+					curr: 1 //重新从第 1 页开始
+				}
+			});
+
+			document.getElementById("search_key").value = "";
+		}
+
+		layui.use(['form', 'layedit', 'laydate', 'element', 'jquery'], function () {
+			var form = layui.form,
+				layer = layui.layer,
+				element = layui.element,
+				$ = layui.jquery;
+			$(document).on('click', '#add', function () {
+
+				layer.open({
+					title: '添加号码池',
+					closeBtn: 1,
+					type: 2,
+					shade: 0,
+					maxmin: true,
+					area: ['500px', '500px'],
+					content: ['numPoolAdd.html', 'no'], //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['url', 'no']
+					success: function (layero, index) {
+
+					}
+				});
+			});
+		});
+
+
+
+		/*删除*/
+		function del(id) {
+			layui.use('layer', function () {
+				var layer = layui.layer;
+				var $ = layui.jquery;
+
+				layer.confirm('是否确认删除？', function () {
+
+					var url = "numPool.ashx?fun=del&ids=" + id;
+					pop_index = layer.load(0, {
+						shade: [0.3, '#000'] //0.1透明度的白色背景
+					});
+					$.post(url, function (data) {
+						layer.close(pop_index);
+						location.reload();
+						//if(data == "ok") {
+						//	layer.msg("删除成功", function() {
+						//		location.reload();
+						//	});
+						//                     } else {
+						//                         location.reload();
+						//	//layer.msg(data);
+						//}
+					})
+
+				})
+
+			})
+
+		}
+	</script>
+</body>
+
+</html>

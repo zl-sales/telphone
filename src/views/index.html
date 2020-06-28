@@ -1,0 +1,575 @@
+<script type="text/html" template>
+  <link rel="stylesheet" href="{{ layui.setter.base }}style/index.css?v={{ layui.admin.v }}-1" media="all">
+</script>
+
+
+
+<title>主页</title>
+
+<!-- <div class="layui-card layadmin-header">
+  <div class="layui-breadcrumb" lay-filter="breadcrumb">
+    <a lay-href="">主页</a>
+  </div>
+</div> -->
+
+<div class="layui-card">
+  <div class="layui-card-header">
+    当日最新数据
+  </div>
+  <div class="layui-card-body" style="padding: 0;line-height: normal;">
+    <div class="layui-row panel-group" style="display: flex;
+        justify-content: space-between;">
+      <div class="card-panel-col">
+        <div class="card-panel jinri" onclick="location.hash = '/calllog/TodayCallList'">
+          <div class="box-icon">
+            <div class="card-panel-icon-wrapper">
+              <span class="iconfont icon-jinri">
+              </span>
+              <img src="/src/image/bottom1.png" alt="">
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                当日呼叫
+              </div>
+              <div class="num1 num"></div>
+            </div>
+          </div>
+          <div class="layui-progress">
+            <div class="layui-progress-bar bar1" style="background:linear-gradient(to right,#4bc5be,#91ffdb);"
+              lay-percent="70%">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-panel-col">
+        <div class="card-panel jietongdianhua" style="margin-bottom: 15px;"
+          onclick="location.hash = '/calllog/TodayCallList#state[now]=on'">
+          <div class="box-icon">
+            <div class="card-panel-icon-wrapper">
+              <span class="iconfont icon-jietongdianhua">
+              </span>
+              <img src="/src/image/bottom1.png" alt="">
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                当日接通
+              </div>
+              <div class="num2 num"></div>
+            </div>
+          </div>
+          <div class="layui-progress">
+            <div class="layui-progress-bar bar2" style="background:linear-gradient(to right,#ecb15f,#f6e2c4);"
+              lay-percent="100"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-panel-col">
+        <div class="card-panel hungup1" style="margin-bottom: 15px;"
+          onclick="location.hash = '/calllog/TodayCallList#state[now]=not'">
+          <div class="box-icon">
+            <div class="card-panel-icon-wrapper">
+              <span class="iconfont hungup">&#xe58b;</span>
+              <img src="/src/image/bottom1.png" alt="">
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                未接通数
+              </div>
+              <div class="num5 num"></div>
+            </div>
+          </div>
+          <div class="layui-progress">
+            <div class="layui-progress-bar bar3" style="background:linear-gradient(to right,#BF1818,#ffadad);"
+              lay-percent="100"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-panel-col">
+        <div class="card-panel xinzeng" style="margin-bottom: 15px;" onclick="location.hash ='/charts/new'">
+          <div class="box-icon">
+            <div class="card-panel-icon-wrapper">
+              <span class="iconfont icon-xinzeng"></span>
+              <img src="/src/image/bottom1.png" alt="">
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                新增客户
+              </div>
+              <div class="num3 num"></div>
+            </div>
+          </div>
+          <div class="layui-progress">
+            <div class="layui-progress-bar bar4" style="background:linear-gradient(to right,#64bdff,#b1e2ff);"
+              lay-percent="10%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-panel-col">
+        <div class="card-panel genjin" style="margin-bottom: 15px;" onclick="location.hash = '/charts/follow'">
+          <div class="box-icon">
+            <div class="card-panel-icon-wrapper">
+              <span class="iconfont icon-genjin"></span>
+              <img src="/src/image/bottom1.png" alt="">
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                跟进客户
+              </div>
+              <div class="num4 num"></div>
+            </div>
+          </div>
+          <div class="layui-progress">
+            <div class="layui-progress-bar bar5"
+              style="background:linear-gradient(to right, rgb(187, 191, 112), #fcffce);" lay-percent="10%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="charts-row"></div>
+<div class="layui-row layui-col-space5 panel-group">
+  <div class="chart layui-col-md6 layui-col-xs12 layui-col-sm12">
+    <div class="layui-card">
+      <div class="layui-card-header">本周通话统计</div>
+      <div class="layui-card-body">
+        <div class="echarts1" style="width: 100%;height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chart layui-col-md6 layui-col-xs12 layui-col-sm12">
+    <div class="layui-card">
+      <div class="layui-card-header">当日呼叫统计</div>
+      <div class="layui-card-body">
+        <div class="echarts3" style="width: 100%;height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chart layui-col-md4 layui-col-xs12 layui-col-sm12">
+    <div class="layui-card">
+      <div class="layui-card-header">本周客户记录</div>
+      <div class="layui-card-body">
+        <div class="echarts2" style="width: 100%;height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chart layui-col-md4 layui-col-xs12 layui-col-sm12">
+    <div class="layui-card">
+      <div class="layui-card-header">当日客户记录</div>
+      <div class="layui-card-body">
+        <div class="echarts4" style="width: 100%;height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chart layui-col-md4 layui-col-xs12 layui-col-sm12">
+    <div class="layui-card">
+      <div class="layui-card-header">当日接听率</div>
+      <div class="layui-card-body">
+        <div class="echarts5" style="width: 100%;height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function formatter(str) {
+    var date = new Date(str)
+    return date.toLocaleDateString()
+  }
+  function up(obj) {
+    var item = obj.el;
+    var num = obj.max;
+    var start = obj.start;
+    var time2 = null
+    time2 = setInterval(function () {
+      start = start + 50
+      if (start > num) {
+        start = num;
+        clearInterval(time2);
+      }
+      item.text(start)
+    }, 0)
+  }
+
+  $(function () {
+    $.ajax({
+      methods: 'get',
+      url: 'http://voip.winsource.cn:9090/app/Statistics/Statistics.ashx?fun=todayPanel&Department=' + sessionStorage.getItem("DepartmentID"),
+      dataType: 'json',
+      success: function (res) {
+        var n = res.TodayCallNum - res.TodayCallConnected
+        var list = [
+          {
+            el: $(".num1"),
+            max: Number(res.TodayCallNum),
+            start: 0//增加开始的初始值
+          },
+          {
+            el: $(".num2"),
+            max: Number(res.TodayCallConnected),
+            start: 0//增加开始的初始值
+          },
+          {
+            el: $(".num3"),
+            max: Number(res.TodayCrmAdd),
+            start: 0//增加开始的初始值
+          },
+          {
+            el: $(".num4"),
+            max: Number(res.TodayFollowUp),
+            start: 0//增加开始的初始值
+          },
+          {
+            el: $(".num5"),
+            max: n,
+            start: 0//增加开始的初始值
+          }
+        ]
+        $(".bar1").attr("lay-percent", res.TodayCallNum)
+        $(".bar2").attr("lay-percent", res.TodayCallConnected)
+        $(".bar3").attr("lay-percent", n)
+        $(".bar4").attr("lay-percent", res.TodayCrmAdd)
+        $(".bar5").attr("lay-percent", res.TodayFollowUp)
+        up(list[0]);
+        up(list[1]);
+        up(list[2]);
+        up(list[3]);
+        up(list[4]);
+        layui.element.render()
+        var four = echarts.init($(".echarts4")[0], 'customed')
+        var five = echarts.init($(".echarts5")[0], 'customed')
+        four.setOption({
+          tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c} ({d}%)'
+          },
+          legend: {
+            left: 'center',
+            data: ['新增客户数', '跟进客户数']
+          },
+          series: [
+            {
+              name: "当日",
+              type: 'pie',
+              radius: '50%',
+              // center: ['30%', '60%'],
+              data: [
+                { value: res.TodayCrmAdd, name: '新增客户数' },
+                { value: res.TodayFollowUp, name: '跟进客户数' }
+              ]
+            }
+          ]
+        }, true)
+        five.setOption({
+          tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c} ({d}%)'
+          },
+          legend: {
+            left: 'center',
+            data: ['总呼叫次数', '接听次数', "未接听次数"]
+          },
+          series: [
+            {
+              name: "当日",
+              type: 'pie',
+              radius: '40%',
+              // center: ['70%', '60%'],
+              data: [
+                { value: res.TodayCallConnected, name: '接听次数' },
+                { value: n, name: '未接听次数' }
+              ]
+            },
+            {
+              name: '当日总呼叫数',
+              type: 'pie',
+              radius: ['50%', '75%'],
+              data: [
+                { value: res.TodayCallNum, name: "总呼叫次数" }
+              ]
+            }
+          ]
+        }, true)
+        window.addEventListener('resize', function () {
+          four.resize()
+        })
+      }
+    })
+  })
+
+
+  layui.use(['admin', 'carousel', "element"], function () {
+    var $ = layui.$, element = layui.element;
+    var admin = layui.admin;
+    var carousel = layui.carousel;
+    element.render()
+
+    var one = echarts.init($(".echarts1")[0], 'customed')
+    var two = echarts.init($(".echarts2")[0], 'customed')
+    var three = echarts.init($(".echarts3")[0], 'customed')
+
+    function GetOne() {
+      $.ajax({
+        methods: 'get',
+        url: "http://voip.winsource.cn:9090/app/Statistics/Statistics.ashx?fun=weak&Department=" + sessionStorage.getItem("DepartmentID"),
+        success: function (res) {
+          var res = JSON.parse(res)
+          var Clist = []
+          var Olist = []
+          var Date = []
+          call = res[0]
+          on = res[1]
+          call.forEach((item, i) => {
+            Date.push(formatter(item.Date))
+            Clist.push(item.num)
+          });
+          on.forEach((item, i) => {
+            Date.push(formatter(item.Date))
+            Olist.push(item.num)
+          });
+          Date = Array.from(new Set(Date));
+          var OneOption = {
+            // title: {
+            //   text: '未来一周气温变化',
+            // },
+            tooltip: {
+              trigger: 'axis'
+            },
+            legend: {
+              data: ['呼叫次数', '接通次数']
+            },
+            xAxis: {
+              type: 'category',
+              data: Date
+            },
+            yAxis: {
+              type: 'value',
+              axisLabel: {
+                formatter: '{value}'
+              }
+            },
+            series: [
+              {
+                name: '呼叫次数',
+                type: 'line',
+                areaStyle: {
+                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0, color: '#28aae3' // 0% 处的颜色
+                  }, {
+                    offset: 0.4, color: '#3497c2' // 100% 处的颜色
+                  }, {
+                    offset: 1, color: '#3FB1E3' // 100% 处的颜色
+                  }]
+                  )
+                },
+                data: Clist, smooth: true,
+                markPoint: {
+                  data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                  ]
+                },
+                markLine: {
+                  data: [
+                    { type: 'average', name: '平均值' }
+                  ]
+                }
+              },
+              {
+                name: '接通次数',
+                type: 'line',
+                areaStyle: {
+                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0, color: '#4aac85' // 0% 处的颜色
+                  }, {
+                    offset: 0.4, color: '#4aac85' // 100% 处的颜色
+                  }, {
+                    offset: 1, color: '#4aac85' // 100% 处的颜色
+                  }]
+                  )
+                },
+                data: Olist,
+                smooth: true,
+                markPoint: {
+                  data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                  ]
+                },
+                markLine: {
+                  data: [
+                    { type: 'average', name: '平均值' }
+                  ]
+                }
+              }
+            ]
+          };
+          one.setOption(OneOption)
+        }
+      })
+    }
+
+    GetOne();
+
+
+    function GetTwo() {
+      $.ajax({
+        methods: "get",
+        url: 'http://voip.winsource.cn:9090/app/Statistics/Statistics.ashx?fun=crmWeak&Department=' + sessionStorage.getItem("DepartmentID"),
+        // dataType: 'json',
+        success: function (res) {
+          var res = JSON.parse(res)
+          var Clist = []
+          var Olist = []
+          var Date = []
+          call = res[0]
+          on = res[1]
+          call.forEach((item, i) => {
+            Date.push(formatter(item.Date))
+            Clist.push(item.num)
+          });
+          on.forEach((item, i) => {
+            Date.push(formatter(item.Date))
+            Olist.push(item.num)
+          });
+          Date = Array.from(new Set(Date));
+          var TwoOption = {
+            xAxis: {
+              type: 'category',
+              // boundaryGap: false,
+              data: Date
+            },
+            yAxis: {
+              type: 'value'
+            },
+            legend: {
+              data: ['新增客户', '跟进客户']
+            },
+            tooltip: {
+              trigger: 'axis'
+            },
+            series: [
+              {
+                data: Clist,
+                type: 'line',
+                name: '新增客户',
+                markPoint: {
+                  data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                  ]
+                },
+                markLine: {
+                  data: [
+                    { type: 'average', name: '平均值' }
+                  ]
+                },
+                showBackground: true
+              },
+              {
+                data: Olist,
+                type: 'line',
+                name: '跟进客户',
+                showBackground: true,
+                markPoint: {
+                  data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                  ]
+                },
+                markLine: {
+                  data: [
+                    { type: 'average', name: '平均值' }
+                  ]
+                }
+              },
+            ]
+          };
+          two.setOption(TwoOption)
+        }
+      })
+    }
+
+    GetTwo()
+
+    function GetThree() {
+      $.ajax({
+        methods: "get",
+        url: "http://voip.winsource.cn:9090/app/Statistics/Statistics.ashx?fun=seatToday&Department=" + sessionStorage.getItem("DepartmentID"),
+        success: function (res) {
+          var res = JSON.parse(res)
+          var SeatList = []
+          var OnList = []
+          var CallList = []
+          for (let i = 0; i < res.length; i++) {
+            SeatList.push(res[i].SeatUserName)
+            OnList.push(res[i].Connects)
+            CallList.push(res[i].Calls)
+          }
+          var ThreeOption = {
+            tooltip: {
+              trigger: 'axis'
+            },
+            legend: {
+              data: ['呼叫数', '接听数']
+            },
+            calculable: true,
+            xAxis: [
+              {
+                type: 'category',
+                axisLabel: {
+                  rotate: -90,
+                },
+                data: SeatList
+              }
+            ],
+            yAxis: [
+              {
+                type: 'value'
+              }
+            ],
+            calculable: false, //禁用拖动
+            series: [
+              {
+                name: '呼叫数',
+                type: 'bar',
+                data: CallList || [0],
+                barWidth: 10,
+                markPoint: {
+                  data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                  ]
+                }
+              },
+              {
+                name: '接听数',
+                type: 'bar',
+                data: OnList || [0],
+                barWidth: 10,
+                markPoint: {
+                  data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                  ]
+                }
+              }
+            ]
+          };
+          three.setOption(ThreeOption, true)
+        }
+      })
+    }
+
+    GetThree()
+
+    window.addEventListener('resize', function () {
+      one.resize()
+      two.resize()
+      three.resize()
+    })
+  })
+
+</script>

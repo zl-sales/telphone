@@ -1,0 +1,229 @@
+<title>点击外呼</title>
+
+
+
+
+    <div class="layui-card">
+        <div class="layui-card-header">
+            点击外呼
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-card layadmin-header">
+                <div class="layui-form">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">快速拨号</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="tel" lay-verify="tel" autocomplete="off" placeholder="请输入号码"
+                                    class="layui-input tel">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+
+                            <button class="layui-btn CallTel">拨打</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="layui-hide" id="ClickOutCall" lay-filter="ClickOutCall"></table>
+        </div>
+    </div>
+
+
+
+
+<script type="text/html" id="ClickOutCallBar">
+    <a class="layui-btn layui-btn-xs" lay-event="call">点击外呼</a>
+</script>
+
+<script>
+    var timer = null
+
+    timer = setInterval(() => {
+        Dialog()
+    }, 5000);
+
+    $(window).bind('beforeunload', function () {
+        clearInterval("timer")
+    });
+
+
+    function Dialog() {
+        $.ajax({
+            type: 'POST',
+            url: 'http://voip.winsource.cn:9090/app/BombScreen.ashx?fun=BombScreen&user=' + sessionStorage.getItem("TelNumber"),
+            dataType: 'json',
+            success: function (res) {
+                if (res.code === "200") {
+                    sessionStorage.setItem("CustomerTelNumber", res.msg);
+                    sessionStorage.setItem("keys", res.keys);
+                    $.ajax({
+                        type: 'POST',
+                        url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=call',
+                        data: {
+                            "data": res.msg
+                        },
+                        dataType: 'json',
+                        success: function (ress) {
+                            //layer.msg(ress);
+
+                            if (ress.code === "200") {
+                                sessionStorage.setItem("CRMUserInfo", ress.data);
+                                //layer.msg(JSON.parse(data).msg);
+                                tableClickCallList.reload({ // where: getcond(),
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                });
+                                //layer.msg(JSON.parse(ress).type);
+                                if (ress.type === "0") {
+                                    p1 = layer.open({
+                                        title: '添加客户信息',
+                                        closeBtn: 1,
+                                        type: 2,
+                                        maxmin: true,
+                                        area: ['1020px', '680px'],
+                                        content: ['/src/views/telphone/CrmUserInfoAdd.html'],
+                                        success: function (layero, index) { }
+                                    });
+                                    //layer.full(p1);
+                                };
+
+                                if (ress.type === "1") {
+                                    //console.log(JSON.stringify(ress.data));
+                                    p2 = layer.open({
+                                        title: '跟进客户信息',
+                                        closeBtn: 1,
+                                        type: 2,
+                                        maxmin: true,
+                                        area: ['1020px', '680px'],
+                                        content: ['/src/views/telphone/CrmFollowAdd.html'],
+                                        success: function (layero, index) { }
+                                    });
+                                    //layer.full(p2);
+                                };
+                            } else {
+                                //layer.msg(JSON.parse(data).msg);
+                                tableClickCallList.reload({ // where: getcond(),
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                });
+                            }
+                        },
+                        error: function (err) {
+                            //layer.msg(err.status);
+                            //alert(err.status);
+                        }
+                    });
+
+                }
+            }
+        })
+    }
+    
+    function Ct(num) {
+        $.ajax({
+            type: 'POST',
+            url: 'http://voip.winsource.cn:9090/app/fs.ashx?fun=call',
+            data: {
+                "caller": JSON.parse(sessionStorage.getItem("user")).ExtensionNumber,
+                "called": num
+            },
+            success: function (data) {
+                layer.msg("提交拨号" + num + "成功");
+                $(".layui-icon-refresh").click();
+            },
+            error: function (err) {
+                layer.msg("提交失败");
+                alert(err.status);
+            }
+        })
+    }
+
+    $(".CallTel").click(function () {
+        var num = $(".tel").val()
+        if (num == "") {
+            layer.msg("号码不能为空")
+        } else {
+            var hao = num.trim()
+            Ct(hao)
+            $(".tel").val("")
+        }
+    })
+
+    function intercept(str) {
+        var tel = str.toString()
+        var tel1 = tel.substr(0, 3) + "****" + tel.substr(7)
+        return tel1
+    }
+
+    layui.use(['table', 'form'], function () {
+        var form = layui.form;
+        var table = layui.table;
+
+        form.render()
+
+
+        tableClickCallList = table.render({
+            elem: '#ClickOutCall',
+            url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=ClickCallList&userID=100091001&user=' + sessionStorage.getItem("user"),
+            page: {
+                layout: ['prev', 'page', 'next', 'skip', 'count', 'limit', 'refresh']
+            },
+            height: "full",
+            cols: [
+                [{
+                    title: '外呼操作',
+                    toolbar: '#ClickOutCallBar',
+                    width: 100
+
+                }, {
+                    field: 'ID',
+                    title: 'ID',
+                    hide: true
+                }, {
+                    field: 'DepartmentID',
+                    title: '所属单位',
+                    hide: true
+                }, {
+                    field: 'CustomerName',
+                    title: '客户名称',
+                    templet: function (d) {
+                        return d.CustomerName.substr(0, 1) + "***"
+                    }
+                }, {
+                    field: 'CustomerNumber',
+                    title: '客户号码',
+                    event: 'call',
+                    style: 'cursor: pointer;',
+                    templet: "<div title = '点击呼叫'> <span title='呼叫{{intercept(d.CustomerNumber)}}';display:block;> <i class='iconfont '>&#xe602;</i></span>{{intercept(d.CustomerNumber)}} </div>"
+                }, {
+                    field: 'AddPeople',
+                    title: '添加人',
+                }, {
+                    field: 'Note',
+                    title: '备注',
+                    hide: true
+                }, {
+                    field: 'Address',
+                    title: '地址',
+                    hide: true
+                }, {
+                    field: 'AddTimes',
+                    title: '添加时间'
+                }
+
+                ]
+            ]
+        });
+        table.on('tool()', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'call') {
+                sessionStorage.setItem("CustomerNumber", data.CustomerNumber)
+                Ct(data.CustomerNumber)
+            }
+
+        });
+    });
+</script>

@@ -1,0 +1,195 @@
+<title>分机列表</title>
+
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        点呼任务
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-tab-item layui-show">
+            <table id="TelRegList" lay-filter="TelRegList"></table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function intercept(str) {
+        var tel = str.toString() || ""
+        var tel1 = tel.substr(0, 3) + "****" + tel.substr(7)
+        return tel1
+    }
+
+    layui.use('table', function (exports) {
+
+        var $ = layui.jquery,
+            table = layui.table
+
+
+        //分机列表
+        table.render({
+            elem: '#TelRegList',
+            loading: true,
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TelRegList',
+            where: {
+                DepartmentID: sessionStorage.getItem("DepartmentID")
+            },
+            page: true,
+            cols: [
+                [
+
+                    {
+                        field: 'reg_user',
+                        title: '座机号码'
+                    }, {
+                        field: 'SeatUserName',
+                        title: '用户名称'
+                    }, {
+                        field: 'DepartmentName',
+                        title: '公司名称'
+                    }, {
+                        field: 'GroupName',
+                        title: '所属团队'
+                    },
+                    {
+                        title: "操作",
+                        width: "270",
+                        templet: `<div class="layui-btn-group">
+                                    <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="task">分配任务</button>
+                                    <button type="button" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="clear">清空任务</button>
+                                    <button type="button" class="layui-btn layui-btn-sm layui-btn-warn" lay-event="show">查看列表</button>
+                                 </div>`
+                    }
+                ]
+            ],
+        });
+
+        table.on("tool()", function (obj) {
+            var { data } = obj
+            console.log(data);
+            var Tel = data.reg_user
+            if (obj.event == "task") {
+                layer.open({
+                    title: "分配任务",
+                    type: 1,
+                    area: ['250px', '150px'], //宽高
+                    content: `
+                                <div style="margin-top: 20px;margin-bottom: 20px;text-align:center">
+                                    <button type="button" class="layui-btn" id="upload"><i class="layui-icon"></i>上传文件</button>
+                                </div>
+                        `,
+                    success: function () {
+                        layui.use(["upload", "table"], function () {
+                            var upload = layui.upload
+                            var table = layui.table
+                            upload.render({
+                                elem: '#upload',
+                                accept: 'file',//普通文件
+                                exts: 'xlsx|xls|csv', //只允许上传压缩文件
+                                url: 'http://voip.winsource.cn:9090/app/Upload.ashx',
+                                bindAction: '#ok',
+                                data: {
+                                    UserID: Tel
+                                },
+                                before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                                    layer.msg('加载中', {
+                                        icon: 16
+                                    })
+                                },
+                                done: function (res) {
+                                    if (res.code === "200") {
+                                        layer.closeAll();
+                                        layer.msg(res.msg);
+                                    } else {
+                                        layer.msg(res.msg);
+                                        layer.closeAll('msg');
+                                    }
+                                },
+                                error: function () {
+                                    layer.closeAll("msg")
+                                }
+                            })
+                        })
+                    }
+                });
+            } else if (obj.event == "clear") {
+                layer.confirm("是否确定删除？", function () {
+                    $.ajax({
+                        method: "post",
+                        url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=DelAllList',
+                        data: {
+                            UserID: Tel
+                        },
+                        dataType: "json",
+                        success: function (res) {
+                            if (res.code == 200) {
+                                layer.msg("删除成功")
+                            } else {
+                                layer.msg("删除失败")
+                            }
+                            layer.closeAll()
+                            TL.reload()
+                        }
+                    })
+                })
+            } else if (obj.event == "show") {
+                var index = layer.open({
+                    title: "查看列表",
+                    type: 1,
+                    area: ["600px", "500px"],
+                    content: `<div style="height:100%;width:100%;box-sizing:border-box;padding:10px"><table id="listTable" lay-fillter="listTable"></table></div>`,
+                    // area: ["660px", "540px"],
+                    success: function () {
+                        table.render({
+                            elem: '#listTable',
+                            loading: true,
+                            url: 'http://voip.winsource.cn:9090/app/ClickOutCall.ashx?fun=ClickCallList',
+                            where: {
+                                UserID: obj.data.reg_user
+                            },
+                            page: true,
+                            cols: [
+                                [
+                                    {
+                                        field: 'ID',
+                                        title: 'ID',
+                                        hide: true
+                                    },
+                                    {
+                                        field: 'CustomerName',
+                                        title: '客户名称',
+                                        hide: true
+                                    },
+                                    {
+                                        field: 'CustomerNumber',
+                                        title: '客户号码',
+                                        templet: function (d) {
+                                            return intercept(d.CustomerNumber)
+                                        }
+                                    },
+                                    {
+                                        field: 'Address',
+                                        title: '地址',
+                                        hide: true
+                                    },
+                                    {
+                                        field: 'AddTimes',
+                                        title: '添加时间'
+                                    },
+                                    {
+                                        field: 'AddPeople',
+                                        title: '添加人'
+                                    },
+                                    {
+                                        field: 'Note',
+                                        title: '备注'
+                                    }
+                                ]
+                            ],
+                        });
+                    }
+                })
+            }
+        })
+    });
+</script>

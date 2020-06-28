@@ -1,0 +1,23 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "2154820",
+      "name": "播放器-弹幕（关）_44",
+      "font_class": "bofangqi-danmuguan",
+      "unicode": "e696",
+      "unicode_decimal": 59030
+    },
+    {
+      "icon_id": "2154821",
+      "name": "播放器-弹幕（开）_44",
+      "font_class": "bofangqi-danmukai",
+      "unicode": "e697",
+      "unicode_decimal": 59031
+    }
+  ]
+}

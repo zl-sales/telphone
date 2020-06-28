@@ -1,0 +1,59 @@
+<title>分机列表</title>
+
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        分机列表
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-tab-item layui-show">
+            <table class="layui-hide" id="TelRegList" lay-filter="TelRegList"></table>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    layui.use('table', function (exports) {
+
+        var $ = layui.jquery,
+            table = layui.table
+
+
+        //分机列表
+        table.render({
+            elem: '#TelRegList',
+            loading: true,
+            skin:"nob",
+            url: 'http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=TelRegList',
+            where: {
+                DepartmentID: sessionStorage.getItem("DepartmentID")
+            },
+            page: true,
+            cols: [
+                [
+
+                    {
+                        field: 'reg_user',
+                        title: '座机号码'
+                    }, {
+                        field: 'SeatUserName',
+                        title: '用户名称'
+                    }, {
+                        field: 'DepartmentName',
+                        title: '公司名称'
+                    }, {
+                        field: 'GroupName',
+                        title: '所属团队'
+                    },
+                    // {
+                    //     field: 'GroupLeaderType',
+                    //     title: '岗位职责'
+                    // }
+
+                ]
+            ],
+        });
+    });
+</script>

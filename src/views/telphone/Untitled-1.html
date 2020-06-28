@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>CRM弹屏-用户跟进</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link rel="stylesheet" href="../../../start/layui/css/layui.css" media="all">
+	<link rel="stylesheet" href="../../lib/opTable/opTable.css" media="all">
+	<!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+
+<body>
+	<script src="../../../start/layui/layui.js" charset="utf-8"></script>
+
+	<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+	<div class="layui-card">
+
+		<div class="layui-collapse " lay-accordion>
+			<div class="layui-colla-item">
+				<h2 class="layui-colla-title">客户信息</h2>
+				<div class="layui-colla-content">
+					<div class="item-child">
+						<table id='CrmUser' lay-filter='CrmUser'></table>
+					</div>
+				</div>
+			</div>
+			<div class="layui-colla-item">
+				<h2 class="layui-colla-title">跟进记录</h2>
+				<div class="layui-colla-content layui-show">
+					<div class="layui-card-body">
+						<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+							<legend>跟进信息</legend>
+						</fieldset>
+						<form class="layui-form" action="" onsubmit="return false">
+							<div class="layui-form-item">
+								<label class="layui-form-label">来电状态</label>
+								<div class="layui-input-block">
+									<input type="radio" name="CallStatus" value="已接来电" title="已接来电" checked>
+									<input type="radio" name="CallStatus" value="已接挂机" title="已接挂机">
+									<input type="radio" name="CallStatus" value="未接来电" title="未接来电">
+									<input type="radio" name="CallStatus" value="空号" title="空号">
+									<input type="radio" name="CallStatus" value="VIP客户" title="VIP客户">
+									<input type="radio" name="CallStatus" value="标记客户" title="标记客户">
+									<input type="radio" name="CallStatus" value="回电客户" title="回电客户">
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label layui-required">本机号码
+								</label>
+								<div class="layui-input-inline">
+									<input type="text" id="TelNumber" name="TelNumber" required lay-verify="required"
+										placeholder="本机号码" autocomplete="off" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item layui-input-inline">
+								<label class="layui-form-label layui-required">客户号码
+								</label>
+								<div class="layui-input-inline">
+									<input type="text" id="CustomerTelNumber" name="CustomerTelNumber" required
+										lay-verify="required" placeholder="请输入输入框内容" autocomplete="off"
+										class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">备用号码</label>
+								<div class="layui-input-block">
+									<input type="text" name="CustomerAlternateTelNumber" placeholder="请输入客户备用号码"
+										autocomplete="off" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label layui-required">客户称谓</label>
+								<div class="layui-input-inline">
+									<input type="text" name="CustomerName" placeholder="请输入客户称谓" autocomplete="off"
+										class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item   layui-input-inline">
+								<label class="layui-form-label">客户地址</label>
+								<div class="layui-input-inline">
+									<input type="text" id="CustomerAddress" name="CustomerAddress" placeholder="请输入客户地址"
+										autocomplete="off" class="layui-input">
+								</div>
+							</div>
+
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label">证件类型</label>
+								<div class="layui-input-inline">
+									<select name="DocumentType" lay-search>
+										<option value=""></option>
+										<option value="身份证">身份证</option>
+										<option value="驾驶证">驾驶证</option>
+										<option value="港澳台通行证">港澳台通行证</option>
+										<option value="护照">护照</option>
+										<option value="军官证">军官证</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label">证件号码</label>
+								<div class="layui-input-inline">
+									<input type="text" name="DocumentID" placeholder="请输入证件号码" autocomplete="off"
+										class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label layui-required">客户分类</label>
+								<div class="layui-input-inline">
+									<select name="CustomerClassification" required lay-verify="required" lay-search>
+										<option value=""></option>
+										<option value="重点客户">重点客户</option>
+										<option value="VIP客户">VIP客户</option>
+										<option value="优质客户">优质客户</option>
+										<option value="一般客户">一般客户</option>
+										<option value="潜力客户">潜力客户</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label">套餐类型</label>
+								<div class="layui-input-inline">
+									<select name="PackageType" lay-search>
+										<option value=""></option>
+										<option value="A套餐">A套餐</option>
+										<option value="B套餐">B套餐</option>
+										<option value="C套餐">C套餐</option>
+										<option value="D套餐">D套餐</option>
+										<option value="E套餐">E套餐</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label">客户来源</label>
+								<div class="layui-input-inline">
+									<select name="CustomerSource" lay-search>
+										<option value=""></option>
+										<option value="公司资源">公司资源</option>
+										<option value="大数据">大数据</option>
+										<option value="友商">友商</option>
+										<option value="上门">上门</option>
+										<option value="互联网">互联网</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-form-item  layui-input-inline">
+								<label class="layui-form-label">产品类型</label>
+								<div class="layui-input-inline">
+									<select name="ProductType" lay-search>
+										<option value=""></option>
+										<option value="实体">实体</option>
+										<option value="金融">金融</option>
+										<option value="服务">服务</option>
+										<option value="IT">IT</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-form-item layui-form-text">
+								<label class="layui-form-label">客户备注</label>
+								<div class="layui-input-block">
+									<textarea name="CustomerRemarks" placeholder="请输入客户备注"
+										class="layui-textarea"></textarea>
+									<!-- <input type="text" id="Backup1" name="Backup1"  readonly = "readonly"  autocomplete="off" class="layui-input"> -->
+
+								</div>
+							</div>
+							<!-- <div class="layui-form-item">
+									<label class="layui-form-label">短信状态</label>
+									<div class="layui-input-block">
+										<input type="radio" name="SMSStatus" value="发送" title="发送">
+										<input type="radio" name="SMSStatus" value="不发送" title="不发送" checked>
+									</div>
+								</div> -->
+							<div class="layui-form-item">
+								<div class="layui-input-block">
+									<button class="layui-btn" lay-submit lay-filter="FollowAdd">立即提交</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="layui-colla-item">
+				<h2 class="layui-colla-title">跟进历史(有通话录音)</h2>
+				<div class="layui-colla-content">
+					<table class="layui-hide" id="CrmRecFollowList" lay-filter="CrmRecFollowList"></table>
+					<script type="text/html" id="CrmRecFollowListBar">
+							<a class="layui-btn layui-btn-xs" lay-event="CrmRecFollowListPlay">播放录音</a>
+						</script>
+					<audio controls id="player"></audio>
+				</div>
+			</div>
+			<div class="layui-colla-item">
+				<h2 class="layui-colla-title">跟进历史</h2>
+				<div class="layui-colla-content">
+					<table class="layui-hide" id="CrmFollowList" lay-filter="CrmFollowList"></table>
+				</div>
+			</div>
+			<div class="layui-colla-item">
+				<h2 class="layui-colla-title">历史通话记录</h2>
+				<div class="layui-colla-content">
+
+					<table class="layui-hide" id="HistoryCallList" lay-filter="HistoryCallList"></table>
+					<!-- <script type="text/html" id="HistoryCallListBar">
+							<a class="layui-btn layui-btn-xs" lay-event="HistoryCallListPlay">播放录音</a>
+						</script>
+						<audio controls id="HistoryCallListPlayer"></audio>
+ -->
+				</div>
+			</div>
+		</div>
+
+	</div>
+</body>
+
+</html>
+<script>
+	layui.extend({
+		opTable: "../../../src/lib/opTable/opTable" // {/}的意思即代表采用自有路径，即不跟随 base 路径
+	}).use(['layer', 'form', 'jquery', 'table', 'laydate', 'element', 'opTable'], function () {
+		var $ = layui.jquery;
+		var layer = layui.layer;
+		var form = layui.form;
+		var laydate = layui.laydate;
+		var table = layui.table;
+		var element = layui.element;
+		var opTable = layui.opTable;
+
+		var audio = document.getElementById("player");
+
+		var data = sessionStorage.getItem("CRMUserInfo").toString().replace("[", "").replace("]", "");
+		sessionStorage.setItem("CRMUserInfo", "");
+		//$("#FollowUpNote").val(data);
+		var json1 = JSON.parse(data);
+
+
+		//$("#CustomerName").val(sessionStorage.getItem("UserName"));
+		$("#TelNumber").val(sessionStorage.getItem("TelNumber"));
+		$("#CustomerTelNumber").val(sessionStorage.getItem("CustomerTelNumber"));
+		$("#Backup1").val(sessionStorage.getItem("keys"));
+		//$("#CustomerAddress").val(sessionStorage.getItem("Address"));
+
+		var CrmUser = layui.opTable.render({
+			elem: '#CrmUser',
+			id: '#CrmUser',
+			width: 1000,
+			url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=CrmUser&user=' + sessionStorage.getItem("TelNumber") +
+				'&CustomerTelNumber=' + json1.CustomerTelNumber,
+			cols: [
+				[{
+					field: 'CallStatus',
+					width: 100,
+					title: '来电状态'
+				}, {
+					field: 'TelNumber',
+					width: 120,
+					title: '本机号码'
+				}, {
+					field: 'CustomerTelNumber',
+					width: 150,
+					title: '客户号码'
+				}, {
+					field: 'CustomerName',
+					title: '客户称谓'
+				}, {
+					field: 'CustomerClassification',
+					width: 120,
+					title: '客户分类'
+				}, {
+					field: 'SubmitTime',
+					width: 200,
+					title: '提交时间'
+				}]
+			]
+
+			//  展开的列配置
+			,
+			openCols: [{
+				field: 'CallStatus',
+				title: '来电状态'
+			}, {
+				field: 'TelNumber',
+				title: '本机号码'
+			}, {
+				field: 'CustomerTelNumber',
+				title: '客户号码'
+			}, {
+				field: 'CustomerName',
+				title: '客户称谓'
+			}, {
+				field: 'CustomerAddress',
+				title: '客户地址'
+			}, {
+				field: 'DocumentType',
+				title: '证件类型'
+			}, {
+				field: 'DocumentID',
+				title: '证件号码'
+			}, {
+				field: 'CustomerClassification',
+				title: '客户分类'
+			}, {
+				field: 'PackageType',
+				title: '套餐类型'
+			}, {
+				field: 'CustomerSource',
+				title: '产品类型'
+			}, {
+				field: 'ProductType',
+				title: '客户来源'
+			}, {
+				field: 'SubmitTime',
+				title: '提交时间'
+			}, {
+				field: 'CustomerRemarks',
+				title: '客户备注'
+			}],
+			onEdit: function (data) {
+				layer.msg("修改内容已输出到日志窗口");
+			},
+			openType: 0,
+			opOrientation: 'h'
+		});
+		CrmUser.openAll();
+
+		element.on('collapse(filter)', function (data) {
+			console.log(data.show); //得到当前面板的展开状态，true或者false
+			console.log(data.title); //得到当前点击面板的标题区域DOM对象
+			console.log(data.content); //得到当前点击面板的内容区域DOM对象
+		});
+
+		var CrmFollowList = layui.opTable.render({
+			elem: '#CrmFollowList',
+			id: '#CrmFollowList',
+			page: true,
+			width: 1000,
+			url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=CrmFollowList&user=' + sessionStorage.getItem("TelNumber") +
+				'&CustomerTelNumber=' + json1.CustomerTelNumber,
+			cols: [
+				[{
+					field: 'CallStatus',
+					title: '来电状态'
+				}, {
+					field: 'TelNumber',
+					title: '本机号码'
+				}, {
+					field: 'CustomerTelNumber',
+					title: '客户号码'
+				}, {
+					field: 'CustomerName',
+					title: '客户称谓'
+				}, {
+					field: 'CustomerClassification',
+					title: '客户分类'
+				}, {
+					field: 'SubmitTime',
+					title: '提交时间'
+				}]
+			],
+			openCols: [{
+				field: 'CallStatus',
+				title: '来电状态'
+			}, {
+				field: 'TelNumber',
+				title: '本机号码'
+			}, {
+				field: 'CustomerTelNumber',
+				title: '客户号码'
+			}, {
+				field: 'CustomerName',
+				title: '客户称谓'
+			}, {
+				field: 'CustomerAddress',
+				title: '客户地址'
+			}, {
+				field: 'DocumentType',
+				title: '证件类型'
+			}, {
+				field: 'DocumentID',
+				title: '证件号码'
+			}, {
+				field: 'CustomerClassification',
+				title: '客户分类'
+			}, {
+				field: 'PackageType',
+				title: '套餐类型'
+			}, {
+				field: 'CustomerSource',
+				title: '产品类型提交时间'
+			}, {
+				field: 'ProductType',
+				title: '客户来源'
+			}, {
+				field: 'SubmitTime',
+				title: '提交时间'
+			}, {
+				field: 'CustomerRemarks',
+				title: '客户备注'
+			}],
+			onEdit: function (data) {
+				layer.msg("修改内容已输出到日志窗口");
+			},
+			openType: 0,
+			opOrientation: 'h'
+		});
+
+		table.render({
+			elem: '#HistoryCallList',
+			loading: true, width: 1000,
+
+			url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=HistoryCallList&user=' + sessionStorage.getItem("TelNumber") +
+				'&CustomerTelNumber=' + sessionStorage.getItem("TelNumber"),
+			cols: [
+				[{
+					field: 'call_uuid',
+					title: 'call_uuid',
+					hide: true
+				}, {
+					field: 'TelNumber',
+					width: 110,
+					title: '本机号码'
+				}, {
+					field: 'CustomerTelNumber',
+					title: '外呼号码',
+					width: 150
+				}, {
+					field: 'CallStatus', width: 100,
+					title: '接通状态'
+				}, {
+					field: 'CustomerName',
+					title: '客户称谓'
+				}, {
+					field: 'CustomerClassification', width: 100,
+					title: '客户标识'
+				}, {
+					field: 'answer_stamp',
+					width: 180,
+					title: '接通时间'
+				}, {
+					field: 'billsec',
+					width: 100,
+					title: '通话时长'
+				}]
+			],
+			page: true
+		});
+
+		table.render({
+			elem: '#CrmRecFollowList',
+			loading: true, width: 1000,
+
+			url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=CrmRecFollowList&user=' + sessionStorage.getItem("TelNumber") +
+				'&CustomerTelNumber=' + json1.CustomerTelNumber,
+			cols: [
+				[{
+					field: 'call_uuid',
+					title: 'call_uuid',
+					hide: true
+				}, {
+					field: 'TelNumber',
+					width: 110,
+					title: '本机号码'
+				}, {
+					field: 'CustomerTelNumber',
+					title: '外呼号码',
+					width: 150
+				}, {
+					field: 'CallStatus', width: 100,
+					title: '接通状态'
+				}, {
+					field: 'CustomerName',
+					title: '客户称谓'
+				}, {
+					field: 'CustomerClassification', width: 100,
+					title: '客户标识'
+				}, {
+					field: 'answer_stamp',
+					width: 180,
+					title: '接通时间'
+				}, {
+					field: 'billsec',
+					width: 100,
+					title: '通话时长'
+				}, {
+					title: '录音操作',
+					toolbar: '#CrmRecFollowListBar',
+					width: 100
+				}]
+			],
+			page: true
+		});
+
+		//当日通话记录播放录音
+		table.on('tool(CrmRecFollowList)', function (obj) {
+			var data = obj.data;
+			console.log(obj.event);
+			if (obj.event == 'CrmRecFollowListPlay') {
+				$.ajax({
+					methods: "get",
+					url: "http://voip.winsource.cn:9090/app/monitor/monitor.ashx?fun=RecordUrl",
+					data: {
+						CallNum: obj.data.destination_number,
+						SeatTel: obj.data.caller_id_number,
+						StartDate: obj.data.start_stamp
+					},
+					success: function (res) {
+						var url = JSON.parse(res).url;
+						audio.src = url;
+						// func()
+						// startplay(10)   播放时间设置
+						audio.play();
+					}
+				})
+			}
+		});
+
+
+		form.on('submit(FollowAdd)', function (data) {
+			$.ajax({
+				type: 'POST',
+				url: 'http://voip.winsource.cn:9090/app/CRM.ashx?fun=CrmFollowAdd',
+				data: {
+					"data": JSON.stringify(data.field)
+				},
+				success: function (data) {
+					var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index); //再执行关闭
+					layer.msg("提交成功");
+				},
+				error: function (err) {
+					var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index); //再执行关闭
+					layer.msg("提交失败");
+				}
+			})
+			return false;
+		});
+	});
+</script>
